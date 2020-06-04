@@ -1,0 +1,45 @@
+.cp-ua-auth_form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.cp-ua-auth_form-header {
+  display: flex;
+  font-family: Roboto, Open Sans, sans-serif;
+  font-size: 24px;
+}
+
+.cp-ua-auth_form-input_email {
+  width: 50%;
+  display: flex;
+  margin: 10px 0;
+  height: 25px;
+}
+
+.cp-ua-auth_form-input_password {
+  width: 50%;
+  display: flex;
+  margin: 10px 0;
+  height: 25px;
+}
+.cp-ua-auth_form-btn_login {
+  width: 20%;
+  height: 40px;
+  //border-radius: 20px;
+  //border: 1px solid rgb(46, 62, 110);
+  background-color: blanchedalmond;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: black;
+  &:hover {
+    background-color: orange;
+    cursor: pointer;
+  }
+}

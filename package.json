@@ -9,9 +9,10 @@
     "@testing-library/user-event": "^7.2.1",
     "concurrently": "^5.2.0",
     "electron": "^9.0.2",
-    "prettier": "^1.15.3",
     "electron-builder": "^22.7.0",
     "electron-is-dev": "^1.2.0",
+    "node-sass": "^4.14.1",
+    "prettier": "^1.15.3",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
@@ -41,5 +42,8 @@
   },
   "devDependencies": {
     "prettier": "^1.15.3"
+  },
+  "prettier": {
+    "printWidth": 110
   }
 }
