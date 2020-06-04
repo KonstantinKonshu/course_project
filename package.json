@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^7.2.1",
     "concurrently": "^5.2.0",
     "electron": "^9.0.2",
+    "prettier": "^1.15.3",
     "electron-builder": "^22.7.0",
     "electron-is-dev": "^1.2.0",
     "react": "^16.13.1",
@@ -37,5 +38,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "prettier": "^1.15.3"
   }
 }
