@@ -14,13 +14,13 @@ class AuthModule extends Component {
   }
 
   checkAuth() {
-    const path = require("path");
-    const fs = require("fs");
-    const dir = path.join(__dirname, "../tmp");
-
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir);
-    }
+    // const path = require("path");
+    // const fs = require("fs");
+    // const dir = path.join(__dirname, "../tmp");
+    //
+    // if (!fs.existsSync(dir)) {
+    //   fs.mkdirSync(dir);
+    // }
   }
 
   render() {

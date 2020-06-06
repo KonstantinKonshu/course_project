@@ -5,9 +5,9 @@ import HomePage from "./components/home_page/home_page";
 import "./app.scss";
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-  }
+  // constructor(props) {
+  //   super(props);
+  // }
 
   render() {
     return (

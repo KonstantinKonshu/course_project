@@ -1,8 +1,8 @@
-const {
-  default: installExtension,
-  REACT_DEVELOPER_TOOLS,
-  REDUX_DEVTOOLS
-} = require("electron-devtools-installer");
+// const {
+//   default: installExtension,
+//   REACT_DEVELOPER_TOOLS,
+//   REDUX_DEVTOOLS
+// } = require("electron-devtools-installer");
 const electron = require("electron");
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
@@ -14,7 +14,13 @@ const isDev = require("electron-is-dev");
 let mainWindow;
 
 function createWindow() {
-  mainWindow = new BrowserWindow({ width: 900, height: 680 });
+  mainWindow = new BrowserWindow({
+    width: 900,
+    height: 680,
+    webPreferences: {
+      nodeIntegration: true
+    }
+  });
   mainWindow.loadURL(
     isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`
   );
@@ -35,9 +41,9 @@ app.on("activate", () => {
   }
 });
 
-app.whenReady().then(() => {
-  if (isDev)
-    installExtension([REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS])
-      .then(name => console.log(`Added Extension: ${name}`))
-      .catch(err => console.log("An error occurred: ", err));
-});
+// app.whenReady().then(() => {
+//   if (isDev)
+//     installExtension([REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS])
+//       .then(name => console.log(`Added Extension: ${name}`))
+//       .catch(err => console.log("An error occurred: ", err));
+// });
