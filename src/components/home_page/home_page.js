@@ -8,8 +8,13 @@ class HomePage extends Component {
   }
 
   render() {
-    // console.log("this.state", this.state);
-    return <div>HOME</div>;
+    return (
+      <div className="cp-ua-auth_main_container">
+        {/*<div className="cp-ua-auth_form">*/}
+        <div>Authorization</div>
+        {/*</div>*/}
+      </div>
+    );
   }
 }
 

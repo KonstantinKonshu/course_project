@@ -14,7 +14,7 @@ class App extends Component {
       <div className="cp-app-head_body">
         <Switch>
           <Route exact path="/" component={AuthModule} />
-          <Route exact path="/loggedin" component={HomePage} />
+          <Route exact path="/home" component={HomePage} />
         </Switch>
         <AuthModule />
       </div>

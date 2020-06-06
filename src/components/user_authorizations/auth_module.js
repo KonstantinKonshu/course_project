@@ -1,5 +1,8 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 import "./auth_module.scss";
+import { setUser } from "../../actions/actions";
 
 class AuthModule extends Component {
   constructor(props) {
@@ -8,6 +11,16 @@ class AuthModule extends Component {
       login_user: "",
       password: ""
     };
+  }
+
+  checkAuth() {
+    const path = require("path");
+    const fs = require("fs");
+    const dir = path.join(__dirname, "../tmp");
+
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
   }
 
   render() {
@@ -47,6 +60,9 @@ class AuthModule extends Component {
             className="cp-ua-auth_form-btn_login"
             onClick={() => {
               console.log("Hello btn");
+              this.checkAuth();
+              // this.props.setUser(this.state.login_user, this.state.password);
+              // this.props.history.push("/home");
             }}
           >
             LOGIN
@@ -57,4 +73,16 @@ class AuthModule extends Component {
   }
 }
 
-export default AuthModule;
+const mapStateToProps = state => ({
+  // searchRouting: state.routing.locationBeforeTransitions.search,
+  // routeName: state.routing.locationBeforeTransitions.pathname,
+  // searchName: state.videosReducer.search,
+  // prevPageToken: state.tokensReducer.prevPageToken,
+  // nextPageToken: state.tokensReducer.nextPageToken,
+  // channelId: state.channelsReducer.channelId
+});
+const mapDispatchToProps = dispatch => ({
+  setUser: bindActionCreators(setUser, dispatch)
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(AuthModule);
