@@ -12,6 +12,7 @@ class AuthModule extends Component {
 
   render() {
     console.log("this.state", this.state);
+    console.log("this.props", this.props);
     return (
       <div className="cp-ua-auth_main_container">
         <div className="cp-ua-auth_form">
