@@ -79,7 +79,6 @@ const mapStateToProps = state => ({
   // searchName: state.videosReducer.search,
   // prevPageToken: state.tokensReducer.prevPageToken,
   // nextPageToken: state.tokensReducer.nextPageToken,
-  // channelId: state.channelsReducer.channelId
 });
 const mapDispatchToProps = dispatch => ({
   setUser: bindActionCreators(setUser, dispatch)
