@@ -10,3 +10,5 @@ export const types = {
   // HANDLE_SUBMIT_INIT : "HANDLE_SUBMIT_INIT",
   // SELECT_CHANNEL: "SELECT_CHANNEL",
 };
+
+export const folderPath = "../File_store";
