@@ -1,7 +1,7 @@
 import { types } from "../constants";
 
 const initialState = {
-  user: null,
+  login: null,
   hash_password: null
 };
 
@@ -10,7 +10,7 @@ export default function(state = initialState, action) {
     case types.SET_USER:
       return {
         ...state,
-        user: action.payload1,
+        login: action.payload1,
         hash_password: action.payload2
       };
     // case types.HANDLE_SUBMIT_INIT:
