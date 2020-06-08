@@ -2,14 +2,14 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import ErrorMsgBD from "../error_BD_message/error_msg_BD";
-import { isDirSync, encrypt } from "../../helpers";
+// import { isDirSync, encrypt } from "../../helpers";
 import { setUser } from "../../actions/actions";
 import { folderPath } from "../../constants";
 import "./auth_module.scss";
 
-const path = require("path");
-const fs = require("fs");
-const md5 = require("md5");
+// const path = require("path");
+// const fs = require("fs");
+// const md5 = require("md5");
 const { ipcRenderer } = require("electron");
 // const keytar = require("keytar");
 // const { ipcRenderer } = require("electron");
@@ -27,25 +27,16 @@ class AuthModule extends Component {
   componentDidMount() {
     console.log("componentDidMount");
 
-    console.log("123456", encrypt("SOCIATE_MINERALE"));
-    if (!isDirSync(folderPath)) {
-      this.setState({ is_empty_dir: true });
-      // fs.mkdirSync(folderPath);
-    }
-
-    // fs.access();
-    // if (fs.existsSync(folderPath)) {
-    // } else {
-    //   fs.mkdirSync(folderPath);
-    // }
+    // console.log("123456", encrypt("SOCIATE_MINERALE"));
+    // console.log("123456", ipcRenderer.sendSync("check_directory", folderPath));
+    this.setState({ is_empty_dir: ipcRenderer.sendSync("check_directory", folderPath) });
   }
 
   checkAuth() {
-    if (this.state.is_empty_dir && this.state.login_user === "admin" && this.state.password === "admin") {
-      this.props.setUser(this.state.login_user, this.state.password);
-      this.props.history.push("/home");
-    }
-
+    // if (this.state.is_empty_dir && this.state.login_user === "admin" && this.state.password === "admin") {
+    //   this.props.setUser(this.state.login_user, this.state.password);
+    //   this.props.history.push("/home");
+    // }
     // const dir = path.join(folderPath);
     // console.log("existsSync", fs.existsSync(folderPath));
     // if (!fs.existsSync(folderPath)) {
@@ -54,30 +45,9 @@ class AuthModule extends Component {
   }
 
   regAdmin() {
-    console.log(ipcRenderer.sendSync("synchronous-message", "ping")); // prints "pong"
-
-    ipcRenderer.on("asynchronous-reply", (event, arg) => {
-      console.log(arg); // prints "pong"
-    });
-    ipcRenderer.send("asynchronous-message", "ping");
-
-    // fs.mkdirSync(folderPath);
-    // const keytar = require("keytar");
-    ipcRenderer.send("set-password", this.state.login_user, this.state.password);
-    // try {
-    //   keytar
-    //     .setPassword("test", "this.state.login_user", "md5(this.state.password)")
-    //     .then(res => console.log("r", res));
-    // } catch (e) {
-    //   console.log(e);
-    // }
-    // keytar.setPassword("KeytarTest", "AccountName", "secret").then(r => console.log(r));
-    // const secret = keytar.getPassword("KeytarTest", "AccountName");
-    // secret.then(result => {
-    //   console.log("result: " + result); // result will be 'secret'
-    // });
-    // console.log("PWD", keytar.getPassword("course_project", this.state.login_user));
-    // fs.writeFileSync(path.join(folderPath, "register_user.txt"), "Привет ми ми ми!");
+    ipcRenderer.send("set-password-admin", this.state.login_user, this.state.password);
+    this.props.setUser(this.state.login_user, this.state.password);
+    this.props.history.push("/home");
   }
 
   render() {
@@ -119,10 +89,7 @@ class AuthModule extends Component {
             className="cp-ua-auth_form-btn_login"
             onClick={() => {
               console.log("Hello btn");
-              // console.log(md5("admin12345QWERTY"));
               this.state.is_empty_dir ? this.regAdmin() : this.checkAuth();
-              // this.props.setUser(this.state.login_user, this.state.password);
-              // this.props.history.push("/home");
             }}
           >
             LOGIN

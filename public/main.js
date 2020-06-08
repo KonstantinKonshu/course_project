@@ -3,16 +3,20 @@
 //   REACT_DEVELOPER_TOOLS,
 //   REDUX_DEVTOOLS
 // } = require("electron-devtools-installer");
+// import { isDirSync } from "../src/helpers";
+const { isDirSync } = require("./helpers");
+const fs = require("fs");
+// import {folderPath} from "../src/constants";
+
 const electron = require("electron");
 const { ipcMain } = require("electron");
-// const ipcMain = require("electron");
 const app = electron.app;
-// const keytar = require("keytar");
 const BrowserWindow = electron.BrowserWindow;
 
 const path = require("path");
 const url = require("url");
 const isDev = require("electron-is-dev");
+const md5 = require("md5");
 
 let mainWindow;
 
@@ -44,28 +48,49 @@ app.on("activate", () => {
   }
 });
 
-ipcMain.on("asynchronous-message", (event, arg) => {
-  console.log(arg); // prints "ping"
-  event.reply("asynchronous-reply", "pong");
-});
-
-ipcMain.on("synchronous-message", (event, arg) => {
-  console.log(arg); // prints "ping"
-  event.returnValue = "pong";
-});
-
-// ipcMain.on("get-password", (event, user) => {
-//   event.returnValue = keytar.getPassword("ServiceName", user);
+// ipcMain.on("asynchronous-message", (event, arg) => {
+//   console.log(arg); // prints "ping"
+//   event.reply("asynchronous-reply", "pong");
 // });
+//
+// ipcMain.on("synchronous-message", (event, arg) => {
+//   console.log(arg); // prints "ping"
+//   event.returnValue = "pong";
+// });
+ipcMain.on("check_directory", (event, folder_patch) => {
+  console.log("folder_patch", folder_patch);
+  if (!isDirSync(folder_patch)) {
+    console.log("TR");
+    // this.setState({ is_empty_dir: true });
+    // fs.mkdirSync(folder_patch);
+    event.returnValue = true;
+  } else {
+    console.log("FL");
+    event.returnValue = false;
+  }
 
-ipcMain.on("set-password", (event, user, pass) => {
+  // event.returnValue = require("keytar").getPassword("course_project", user);
+});
+
+ipcMain.on("check-password", (event, user, pass) => {
+  console.log("check_user", user);
+
+  const hash_pwd = require("keytar").getPassword("course_project", user);
+
+  const hash_2 = md5(pass + "|admin");
+  console.log("hash_pwd", hash_pwd);
+  console.log("hash_2", hash_2);
+
+  if (md5(pass + "|admin") === hash_pwd) event.returnValue = "admin";
+
+  if (md5(pass + "|user") === hash_pwd) event.returnValue = "user";
+  event.returnValue = "underfined";
+});
+
+ipcMain.on("set-password-admin", (event, user, pass) => {
   console.log("user", user);
   console.log("pass", pass);
-  event.returnValue = require("keytar").setPassword("ServiceName", user, pass);
+  console.log("pass-hash", md5(pass));
+
+  event.returnValue = require("keytar").setPassword("course_project", user, md5(pass + "|admin"));
 });
-// app.whenReady().then(() => {
-//   if (isDev)
-//     installExtension([REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS])
-//       .then(name => console.log(`Added Extension: ${name}`))
-//       .catch(err => console.log("An error occurred: ", err));
-// });
