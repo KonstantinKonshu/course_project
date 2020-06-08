@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { selectDirectory } from "../../actions/actions";
 import "./home_page.scss";
 import { folderPath } from "../../constants";
 const { ipcRenderer } = require("electron");
@@ -16,22 +18,25 @@ class HomePage extends Component {
 
   componentDidMount() {
     console.log("componentDidMount --- HP");
-    this.setState({ is_empty_dir: ipcRenderer.sendSync("check_directory", folderPath) });
-    console.log("is_empty_dir_2", this.state.is_empty_dir);
-    // if (this.props.user_password ===0)
-    // this.setState({
-    //   is_role: ipcRenderer.sendSync("check-password", this.props.user_login, this.props.user_password)
-    // });
-    console.log(
-      "checkPWD",
-      ipcRenderer.send("check-password", this.props.user_login, this.props.user_password)
-    );
+    this.setState({ is_empty_dir: ipcRenderer.sendSync("CHECK_DIRECTORY", folderPath) });
+    this.setState({
+      is_role: ipcRenderer.sendSync("CHECK_PASSWORD", this.props.user_login, this.props.user_password)
+    });
   }
+  renderSelectDir = () => {
+    return (
+      <div>
+        <h2> Select the path to the directory: </h2>
+        <button onClick={this.props.selectDirectory}>Select directory</button>
+        <h3>{`Selected directory: ${this.props.selectedDirectory}`}</h3>
+      </div>
+    );
+  };
 
   renderWorkPanelAdmin() {
     return (
       <div>
-        <div>Folder</div>
+        {this.renderSelectDir()}
         <div>Reg-on Users</div>
         <div>List Users</div>
       </div>
@@ -54,13 +59,14 @@ class HomePage extends Component {
 
 const mapStateToProps = state => ({
   user_login: state.user.login,
-  user_password: state.user.hash_password
+  user_password: state.user.hash_password,
+  selectedDirectory: state.file.selectedDirectory
 });
 
 const mapDispatchToProps = dispatch => ({
   // handleSubmitInit: bindActionCreators(handleSubmitInit, dispatch),
   // getRequestSearch: bindActionCreators(getRequestSearch, dispatch),
-  // setError: bindActionCreators(setError, dispatch)
+  selectDirectory: bindActionCreators(selectDirectory, dispatch)
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomePage);

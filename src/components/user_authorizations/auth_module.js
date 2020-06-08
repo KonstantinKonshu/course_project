@@ -19,8 +19,8 @@ class AuthModule extends Component {
     super(props);
     this.state = {
       login_user: "",
-      password: "",
-      is_empty_dir: false
+      password: ""
+      // is_empty_dir: false
     };
   }
 
@@ -29,7 +29,8 @@ class AuthModule extends Component {
 
     // console.log("123456", encrypt("SOCIATE_MINERALE"));
     // console.log("123456", ipcRenderer.sendSync("check_directory", folderPath));
-    this.setState({ is_empty_dir: ipcRenderer.sendSync("check_directory", folderPath) });
+    this.setState({ is_empty_dir: ipcRenderer.sendSync("CHECK_DIRECTORY", folderPath) });
+    // console.log("is_empty_dir", this.state.is_empty_dir);
   }
 
   checkAuth() {
@@ -45,7 +46,7 @@ class AuthModule extends Component {
   }
 
   regAdmin() {
-    ipcRenderer.send("set-password-admin", this.state.login_user, this.state.password);
+    ipcRenderer.send("SET_ADMIN", this.state.login_user, this.state.password);
     this.props.setUser(this.state.login_user, this.state.password);
     this.props.history.push("/home");
   }

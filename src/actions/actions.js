@@ -1,5 +1,7 @@
 import { types } from "../constants";
 
+const { ipcRenderer } = require("electron");
+
 export const setUser = (user_name, hash_password) => {
   return {
     type: types.SET_USER,
@@ -8,13 +10,41 @@ export const setUser = (user_name, hash_password) => {
   };
 };
 
-// export const getRequestSearch = data => {
+export function setDirectory(dir) {
+  return {
+    type: types.SET_DIRECTORY,
+    payload: dir
+  };
+}
+
+export function selectDirectory() {
+  return async dispatch => {
+    try {
+      const dir = await ipcRenderer.invoke("SELECT_DIRECTORY");
+      dispatch(setDirectory(dir ? dir : null));
+    } catch (e) {
+      console.error(e);
+      dispatch(setDirectory(null));
+    }
+  };
+}
+// export const selectDirectories = data => {
+//
+//   return async dispatch => {
+//     try {
+//       const dirs = await myIpcRenderer.invoke('APP_SELECT_DIRECTORIES');
+//       dispatch(setDirectories(dirs ? dirs : null));
+//     } catch (e) {
+//       console.error(e);
+//       dispatch(setDirectories(null));
+//     }
+//   };
 //     return{
 //         type: types.get.GET_REQUEST_SEARCH,
 //         payload: data
 //     }
 // }
-//
+
 // export const getBannerChannels = bannerChannel =>{
 //     return{
 //         type: types.get.GET_BANNER_CHANNELS,
