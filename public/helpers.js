@@ -1,6 +1,8 @@
 // const {app, Notification} = require('electron');
 const fs = require("fs");
-// const path = require('path');
+const path = require("path");
+const Buffer = require("buffer").Buffer;
+
 // const async = require('async');
 // const hasha = require('hasha');
 // const CryptoJS = require("crypto-js");
@@ -161,8 +163,36 @@ const isDirSync = Path => {
   }
 };
 
+const encode_base64 = path_file => {
+  fs.readFileSync(path_file, function(error, data) {
+    if (error) {
+      throw error;
+    } else {
+      const buf = Buffer.from(data);
+      const img_base64 = buf.toString("base64");
+      //console.log('Base64 of ddr.jpg :' + base64);
+      return img_base64;
+    }
+  });
+};
+
+const decode_base64 = (base64str, path_file) => {
+  const buf = Buffer.from(base64str, "base64");
+
+  fs.writeFileSync(path_file, buf, function(error) {
+    if (error) {
+      throw error;
+    } else {
+      console.log("File created from base64 string!");
+      return true;
+    }
+  });
+};
+
 module.exports = {
-  isDirSync
+  isDirSync,
+  encode_base64,
+  decode_base64
   // getHashFile,
   // getAllFiles,
   // getFiles,

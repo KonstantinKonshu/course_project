@@ -1,4 +1,5 @@
 const { app, ipcMain, dialog } = require("electron");
+// const default_avatar = require("./user_default_img.png");
 // const {getJob} = require('./job.js')
 // const promiseLimit = require('promise-limit');
 const path = require("path");
@@ -8,10 +9,10 @@ const md5 = require("md5");
 // const {CronTime} = require('cron');
 const { getWindow } = require("./window.js");
 const { isDirSync } = require("./helpers");
-// const Store = require('electron-store');
+const Store = require("electron-store");
 
 // const limit = promiseLimit(5);
-// const store = new Store();
+const store = new Store();
 module.exports = () => {
   ipcMain.handle("SELECT_DIRECTORY", event => {
     return dialog.showOpenDialogSync(getWindow("main"), {
@@ -86,5 +87,38 @@ module.exports = () => {
     console.log("pass", pass);
     console.log("pass-hash", md5(pass));
     event.returnValue = require("keytar").setPassword("course_project", user, md5(pass + "|admin"));
+  });
+
+  ipcMain.on("GET_REG_USERS", event => {
+    require("keytar")
+      .findCredentials("course_project")
+      .then(response => {
+        console.log("GET_REG_USERS", response);
+        const users = response.map(user => user.account);
+        event.returnValue = users;
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+  });
+
+  ipcMain.on("GET_AVATAR_USER", (event, user_login) => {
+    const avatar = store.get(`users.${user_login}.avatar`);
+    if (!avatar) {
+      // fs.readFileSync('./your-image.png', 'base64')
+      const file_data = fs.readFileSync(path.resolve(__dirname, "user_default_img.png"), "base64");
+      // console.log("GET_AVATAR_USER", file_data);
+      // let img_path = path.resolve(__dirname, "user_default_img.png");
+      // var file = element.files[0];
+      // let reader = new FileReader();
+      // reader.onloadend = function() {
+      //   console.log("RESULT", reader.result);
+      event.returnValue = file_data;
+      // };
+      // reader.readAsDataURL("./user_default_img.png");
+      // store.set(`users.${user_login}.avatar`, );
+    } else {
+      // event.ret;
+    }
   });
 };
