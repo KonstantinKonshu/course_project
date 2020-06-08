@@ -74,17 +74,56 @@ ipcMain.on("check_directory", (event, folder_patch) => {
 
 ipcMain.on("check-password", (event, user, pass) => {
   console.log("check_user", user);
+  const hash_admin = md5(pass + "|admin");
+  const hash_user = md5(pass + "|user");
 
-  const hash_pwd = require("keytar").getPassword("course_project", user);
+  console.log("hash_admin", hash_admin);
+  console.log("hash_user", hash_user);
+  // const hash_pwd = require("keytar").getPassword("course_project", user);
+  // let role_user = "";
+  require("keytar")
+    .getPassword("course_project", user)
+    .then(res => {
+      console.log("res", res);
+      if (res) {
+        if (hash_admin === res) {
+          console.log("1");
+          event.returnValue = "admin";
+        } else {
+          if (hash_user === res) {
+            console.log("2");
+            event.returnValue = "user";
+          } else event.returnValue = "und";
+        }
+      } else return require("keytar").getPassword("course_project", user);
+    })
+    .then(resp => {
+      console.log("resp", resp);
+      if (md5(pass + "|admin") === resp) {
+        console.log("a");
+        event.returnValue = "admin";
+      } else {
+        if (md5(pass + "|user") === resp) {
+          console.log("b");
+          event.returnValue = "user";
+        } else {
+          console.log("c");
+          event.returnValue = "under";
+        }
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
 
-  const hash_2 = md5(pass + "|admin");
-  console.log("hash_pwd", hash_pwd);
-  console.log("hash_2", hash_2);
+  // console.log("role_user", role_user);
+  // console.log("hash_pwd", hash_pwd);
+  // console.log("hash_2", hash_2);
 
-  if (md5(pass + "|admin") === hash_pwd) event.returnValue = "admin";
-
-  if (md5(pass + "|user") === hash_pwd) event.returnValue = "user";
-  event.returnValue = "underfined";
+  // if (md5(pass + "|admin") === hash_pwd) event.returnValue = "admin";
+  //
+  // if (md5(pass + "|user") === hash_pwd) event.returnValue = "user";
+  // event.returnValue = role_user;
 });
 
 ipcMain.on("set-password-admin", (event, user, pass) => {

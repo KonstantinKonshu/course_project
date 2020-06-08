@@ -57,7 +57,7 @@ class AuthModule extends Component {
       <div className="cp-ua-auth_main_container">
         <div className="cp-ua-auth_form">
           <div className="cp-ua-auth_form-header">
-            {this.state.is_empty_dir ? "Registration" : "Authorization"}
+            {this.state.is_empty_dir ? "Registration Admin" : "Authorization"}
           </div>
 
           <input

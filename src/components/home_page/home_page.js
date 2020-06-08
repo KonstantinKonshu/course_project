@@ -19,12 +19,12 @@ class HomePage extends Component {
     this.setState({ is_empty_dir: ipcRenderer.sendSync("check_directory", folderPath) });
     console.log("is_empty_dir_2", this.state.is_empty_dir);
     // if (this.props.user_password ===0)
-    this.setState({
-      is_role: ipcRenderer.sendSync("check-password", this.props.user_login, this.props.user_password)
-    });
+    // this.setState({
+    //   is_role: ipcRenderer.sendSync("check-password", this.props.user_login, this.props.user_password)
+    // });
     console.log(
       "checkPWD",
-      ipcRenderer.sendSync("check-password", this.props.user_login, this.props.user_password)
+      ipcRenderer.send("check-password", this.props.user_login, this.props.user_password)
     );
   }
 
@@ -41,7 +41,7 @@ class HomePage extends Component {
   render() {
     return (
       <div className="cp-ua-auth_main_container">
-        <div>{`Hi ${this.state.user_login}`}</div>
+        <div>{`Hi ${this.props.user_login}`}</div>
         {this.state.is_role === "admin" && this.renderWorkPanelAdmin()}
 
         {/*<div className="cp-ua-auth_form">*/}
