@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { useSelector, useDispatch } from "react-redux";
-import { selectDirectory } from "../../actions/actions";
-// import Table from "../table/table";
+import { selectDirectory, setUser } from "../../actions/actions";
+// import { status_pwd_success } from "../../constants";
 import "./home_page.scss";
 import { folderPath } from "../../constants";
 const { ipcRenderer } = require("electron");
@@ -13,8 +12,16 @@ class HomePage extends Component {
     super(props);
     this.state = {
       is_empty_dir: false,
-      is_role: ""
+      is_role: "",
+      is_change_pwd: false,
+      old_pwd: "",
+      new_pwd: "",
+      status_change_pwd: undefined
     };
+    // const status_pwd_success = new Notification("Status", {
+    //   body: "Your password has been successfully changed ",
+    //   silent: true
+    // });
   }
 
   componentDidMount() {
@@ -26,9 +33,12 @@ class HomePage extends Component {
     });
 
     console.log("USERS", ipcRenderer.sendSync("GET_REG_USERS"));
-  }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {}
+    // let Status = new Notification("Status", {
+    //   body: "Your password has been successfully changed ",
+    //   silent: true
+    // });
+  }
 
   // renderSelectDir = () => {
   //   return (
@@ -47,6 +57,46 @@ class HomePage extends Component {
   getUserAvatar(user_login) {
     return ipcRenderer.sendSync("GET_AVATAR_USER", user_login);
   }
+
+  handleOnClickChangePwd(user_login, new_pass, old_pass) {
+    console.log(
+      "handleOnClickChangePwd",
+      ipcRenderer.sendSync("CHANGE_PASSWORD", user_login, new_pass, old_pass)
+    );
+    // if (ipcRenderer.sendSync("CHANGE_PASSWORD", user_login, new_pass, old_pass)) {
+    //   this.status_pwd_success.show();
+    // }
+    this.setState({
+      old_pwd: "",
+      new_pwd: ""
+    });
+  }
+
+  handleOnClickExit() {
+    setUser(null, null);
+    this.props.history.push("/");
+  }
+
+  // renderStatusChanges() {
+  //   if (this.state.status_change_pwd === undefined) return undefined;
+  //
+  //   if (this.state.status_change_pwd) {
+  //     const myNotification = new Notification("Title", {
+  //       body: "Lorem Ipsum Dolor Sit Amet"
+  //     });
+  //   }
+  //   // return (
+  //   //   <div className="cp-hp-block_status">
+  //   //     <div></div>
+  //   //   </div>
+  //   // );
+  //
+  //   return (
+  //     <div>
+  //       <div></div>
+  //     </div>
+  //   );
+  // }
 
   renderListRegUser() {
     const users = this.getUserList().map((user, index) => (
@@ -75,32 +125,92 @@ class HomePage extends Component {
     );
   }
 
+  renderUserInfo() {
+    return (
+      <div className="cp-hp-user_info">
+        <div className="cp-hp-user_info-username">{`Welcome ${this.props.user_login}`}</div>
+        <div className="cp-hp-user_info-avatar">
+          <img
+            src={`data:image/png;base64,${ipcRenderer.sendSync("GET_AVATAR_USER", this.props.user_login)}`}
+            alt="avatar"
+          />
+        </div>
+        <div className="cp-hp-user_info-request_btn">
+          <div
+            className="cp-hp-request_btn-btn"
+            onClick={() => {
+              console.log("Hello btn");
+              this.setState({ is_change_pwd: !this.state.is_change_pwd });
+            }}
+          >
+            Change password
+          </div>
+          <div
+            className="cp-hp-request_btn-btn"
+            onClick={() => {
+              console.log("Hello btn123");
+              this.handleOnClickExit();
+            }}
+          >
+            EXIT
+          </div>
+        </div>
+      </div>
+    );
+  }
   // renderWorkPanelUser() {}
+
+  renderChangePassword() {
+    return (
+      <div className="cp-hp-user_workpanel-change_pwd">
+        {/*{this.renderStatusChanges()}*/}
+        <input
+          name="old_password"
+          className="cp-hp-change_pwd-input"
+          type="password"
+          placeholder="Old password"
+          onChange={e => {
+            this.setState({
+              old_pwd: e.target.value
+            });
+          }}
+          value={this.state.old_pwd}
+        />
+        <input
+          name="new_password"
+          className="cp-hp-change_pwd-input"
+          type="password"
+          placeholder="New password"
+          onChange={e => {
+            this.setState({
+              new_pwd: e.target.value
+            });
+          }}
+          value={this.state.new_pwd}
+        />
+        <div
+          className="cp-hp-change_pwd-btn"
+          onClick={() => {
+            console.log("Hello btn");
+            this.handleOnClickChangePwd(this.props.user_login, this.state.new_pwd, this.state.old_pwd);
+          }}
+        >
+          Change
+        </div>
+      </div>
+    );
+  }
 
   render() {
     return (
       <div className="cp-hp-main_container">
-        <div className="cp-hp-user_info">
-          <div className="cp-hp-user_info-username">{`Welcome ${this.props.user_login}`}</div>
-          <div className="cp-hp-user_info-avatar">
-            <img
-              src={`data:image/png;base64,${ipcRenderer.sendSync("GET_AVATAR_USER", this.props.user_login)}`}
-              alt="avatar"
-            />
-          </div>
-          <div className="cp-hp-user_info-request_btn">
-            <div className="cp-hp-request_btn-change_pwd">cp-hp-request_btn-change_pwd</div>
-            <div className="cp-hp-request_btn-exit">EXIT</div>
-          </div>
-        </div>
+        {this.renderUserInfo()}
         <div className="cp-hp-user_workpanel">
           <div>WORK_panel</div>
+          {this.state.is_change_pwd && this.renderChangePassword()}
           {this.state.is_role === "admin" && this.renderWorkPanelAdmin()}
+          {}
         </div>
-
-        {/*<div className="cp-ua-auth_form">*/}
-        {/*<div>Authorization</div>*/}
-        {/*</div>*/}
       </div>
     );
   }
@@ -115,7 +225,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   // handleSubmitInit: bindActionCreators(handleSubmitInit, dispatch),
   // getRequestSearch: bindActionCreators(getRequestSearch, dispatch),
-  // selectDirectory: bindActionCreators(selectDirectory, dispatch)
+  setUser: bindActionCreators(setUser, dispatch)
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomePage);

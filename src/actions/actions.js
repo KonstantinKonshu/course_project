@@ -2,11 +2,11 @@ import { types } from "../constants";
 
 const { ipcRenderer } = require("electron");
 
-export const setUser = (user_name, hash_password) => {
+export const setUser = (user_name, password) => {
   return {
     type: types.SET_USER,
     payload1: user_name,
-    payload2: hash_password
+    payload2: !password || ipcRenderer.sendSync("GET_HASH", user_name, password)
   };
 };
 

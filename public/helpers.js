@@ -1,6 +1,7 @@
 // const {app, Notification} = require('electron');
 const fs = require("fs");
 const path = require("path");
+const notifier = require("node-notifier");
 const Buffer = require("buffer").Buffer;
 
 // const async = require('async');
@@ -189,10 +190,25 @@ const decode_base64 = (base64str, path_file) => {
   });
 };
 
+const status_pwd = status => {
+  const icon_name = status ? "status_success.ico" : "status_error.ico";
+  const title = status
+    ? "Your password has been successfully changed!"
+    : "Your password hasn't been successfully changed";
+  notifier.notify({
+    title: "Course project",
+    message: title,
+    icon: path.join(__dirname, icon_name),
+    sound: true,
+    timeout: 5
+  });
+};
+
 module.exports = {
   isDirSync,
   encode_base64,
-  decode_base64
+  decode_base64,
+  status_pwd
   // getHashFile,
   // getAllFiles,
   // getFiles,
