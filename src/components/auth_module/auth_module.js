@@ -19,8 +19,9 @@ class AuthModule extends Component {
     super(props);
     this.state = {
       login_user: "",
-      password: ""
-      // is_empty_dir: false
+      password: "",
+      is_empty_dir: false,
+      is_no_reg: false
     };
   }
 
@@ -30,25 +31,35 @@ class AuthModule extends Component {
     // console.log("123456", encrypt("SOCIATE_MINERALE"));
     // console.log("123456", ipcRenderer.sendSync("check_directory", folderPath));
     this.setState({ is_empty_dir: ipcRenderer.sendSync("CHECK_DIRECTORY", folderPath) });
-    // console.log("is_empty_dir", this.state.is_empty_dir);
+    if (this.state.is_empty_dir) this.props.push("/registration");
   }
+  //
+  // checkAuth() {
+  //   // if (this.state.is_empty_dir && this.state.login_user === "admin" && this.state.password === "admin") {
+  //   //   this.props.setUser(this.state.login_user, this.state.password);
+  //   //   this.props.history.push("/home");
+  //   // }
+  //   // const dir = path.join(folderPath);
+  //   // console.log("existsSync", fs.existsSync(folderPath));
+  //   // if (!fs.existsSync(folderPath)) {
+  //   // fs.mkdirSync(folderPath);
+  //   // }
+  // }
 
   checkAuth() {
-    // if (this.state.is_empty_dir && this.state.login_user === "admin" && this.state.password === "admin") {
-    //   this.props.setUser(this.state.login_user, this.state.password);
-    //   this.props.history.push("/home");
-    // }
-    // const dir = path.join(folderPath);
-    // console.log("existsSync", fs.existsSync(folderPath));
-    // if (!fs.existsSync(folderPath)) {
-    // fs.mkdirSync(folderPath);
-    // }
-  }
-
-  regAdmin() {
-    ipcRenderer.send("SET_ADMIN", this.state.login_user, this.state.password);
-    this.props.setUser(this.state.login_user, this.state.password);
-    this.props.history.push("/home");
+    const res = ipcRenderer.sendSync("CHECK_AUTH_USER", this.state.login_user, this.state.password);
+    console.log("CHECK", ipcRenderer.sendSync("CHECK_AUTH_USER", this.state.login_user, this.state.password));
+    if (res) {
+      this.props.setUser(this.state.login_user, this.state.password);
+      console.log("YES");
+      this.props.history.push("/home");
+    } else {
+      console.log("NO");
+      this.setState({
+        is_no_reg: true,
+        password: ""
+      });
+    }
   }
 
   render() {
@@ -57,9 +68,9 @@ class AuthModule extends Component {
     return (
       <div className="cp-ua-auth_main_container">
         <div className="cp-ua-auth_form">
-          <div className="cp-ua-auth_form-header">
-            {this.state.is_empty_dir ? "Registration Admin" : "Authorization"}
-          </div>
+          <div className="cp-ua-auth_form-header">Authorization</div>
+
+          {this.state.is_no_reg && <ErrorMsgBD mes={"Data entered incorrectly"} />}
 
           <input
             name="login"
@@ -90,12 +101,23 @@ class AuthModule extends Component {
             className="cp-ua-auth_form-btn_login"
             onClick={() => {
               console.log("Hello btn");
-              this.state.is_empty_dir ? this.regAdmin() : this.checkAuth();
+              this.checkAuth();
             }}
           >
-            LOGIN
+            Login
           </div>
-          {this.state.is_empty_dir && <ErrorMsgBD />}
+          <div
+            className="cp-ua-auth_form-btn_login"
+            onClick={() => {
+              console.log("Hello btn");
+              this.props.history.push("/registration");
+              // this.state.is_empty_dir ? this.regAdmin() : this.checkAuth();
+            }}
+          >
+            Go to registration
+          </div>
+
+          {this.state.is_empty_dir && <ErrorMsgBD mes={"No files, administrator required"} />}
         </div>
       </div>
     );

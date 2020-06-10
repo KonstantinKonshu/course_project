@@ -6,9 +6,10 @@ const path = require("path");
 // const fsp = require('fs').promises;
 const fs = require("fs");
 const md5 = require("md5");
+const { setPassword, getPassword, findCredentials } = require("keytar");
 // const {CronTime} = require('cron');
 const { getWindow } = require("./window.js");
-const { isDirSync, status_pwd } = require("./helpers");
+const { isDirSync, pwdStatus, getRole, getHash } = require("./helpers");
 const Store = require("electron-store");
 
 // const limit = promiseLimit(5);
@@ -33,68 +34,51 @@ module.exports = () => {
     }
   });
 
-  ipcMain.on("CHECK_PASSWORD", (event, user, hash_pass) => {
-    console.log("check_user", user);
-    // const hash_admin = md5(pass + "|admin");
-    // const hash_user = md5(pass + "|user");
-
-    // console.log("hash_admin", hash_admin);
-    // console.log("hash_user", hash_user);
-    let role_user = "";
-    require("keytar")
-      .getPassword("course_project", user)
-      .then(res => {
-        console.log("res", res);
-        if (res) {
-          if (hash_pass === res) {
-            console.log("1");
-            role_user = "admin";
-          } else {
-            if (hash_pass === res) {
-              console.log("2");
-              role_user = "user";
-            } else role_user = "under";
-          }
-          console.log("role_user", role_user);
-          return "nice";
-        } else return require("keytar").getPassword("course_project", user);
-      })
+  ipcMain.on("GET_ROLE", (event, user, pass) => {
+    console.log("ipc GET_ROLE", { user, pass });
+    // const result = getRole(user, pass);
+    // console.log("09876543", result);
+    // event.returnValue = result;
+    getPassword("course_project", user)
       .then(resp => {
-        console.log("resp", resp);
-        if (resp !== "nice") {
-          if (hash_pass === resp) {
-            console.log("a");
-            role_user = "admin";
+        // console.log("GET_ROLE", resp);
+        if (md5(pass + "|admin") === resp) {
+          console.log("a");
+          event.returnValue = "admin";
+        } else {
+          if (md5(pass + "|user") === resp) {
+            console.log("b");
+            event.returnValue = "user";
           } else {
-            if (hash_pass === resp) {
-              console.log("b");
-              role_user = "user";
-            } else {
-              console.log("c");
-              role_user = "under";
-            }
+            console.log("c");
+            event.returnValue = "";
           }
         }
-        event.returnValue = role_user;
       })
       .catch(function(err) {
         console.log(err);
       });
   });
 
-  ipcMain.on("SET_ADMIN", (event, user, pass) => {
-    console.log("user", user);
-    console.log("pass", pass);
-    console.log("pass-hash", md5(pass));
-    event.returnValue = require("keytar").setPassword("course_project", user, md5(pass + "|admin"));
+  ipcMain.on("CHECK_AUTH_USER", (event, user_login, user_password) => {
+    getPassword("course_project", user_login)
+      .then(resp => {
+        console.log("checkPassword", resp);
+
+        event.returnValue = md5(user_password + "|admin") === resp || md5(user_password + "|user") === resp;
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+    // event.returnValue = result;
   });
 
   ipcMain.on("GET_REG_USERS", event => {
-    require("keytar")
-      .findCredentials("course_project")
+    findCredentials("course_project")
       .then(response => {
         console.log("GET_REG_USERS", response);
         const users = response.map(user => user.account);
+        console.log("USERS", users);
         event.returnValue = users;
       })
       .catch(function(err) {
@@ -130,17 +114,16 @@ module.exports = () => {
     let role;
     console.log("new_hash_admin", md5(new_password + "|admin"));
     console.log("new_hash_user", md5(new_password + "|user"));
-    require("keytar")
-      .getPassword("course_project", user_login)
+    getPassword("course_project", user_login)
       .then(getting_pwd => {
         console.log("CHANGE_PASSWORD:GETTING_PASSWORD", getting_pwd);
         role =
           old_hash_admin === getting_pwd ? "|admin" : old_hash_user === getting_pwd ? "|user" : undefined;
         if (role) {
-          status_pwd(true);
-          return require("keytar").setPassword("course_project", user_login, md5(new_password + role));
+          pwdStatus(true);
+          return setPassword("course_project", user_login, md5(new_password + role));
         } else {
-          status_pwd(false);
+          pwdStatus(false);
           event.returnValue = false;
         }
       })
@@ -153,47 +136,9 @@ module.exports = () => {
   });
 
   ipcMain.on("GET_HASH", (event, user_login, user_password) => {
-    const hash_admin = md5(user_password + "|admin");
-    const hash_user = md5(user_password + "|user");
-    let hash_pwd;
-    require("keytar")
-      .getPassword("course_project", user_login)
-      .then(res => {
-        console.log("res", res);
-        if (res) {
-          if (hash_admin === res) {
-            console.log("1--GET_HASH");
-            hash_pwd = hash_admin;
-          } else {
-            if (hash_user === res) {
-              console.log("2--GET_HASH");
-              hash_pwd = hash_user;
-            } else hash_pwd = user_password;
-          }
-          console.log("hash_pwd", hash_pwd);
-          return "nice";
-        } else return require("keytar").getPassword("course_project", user_login);
-      })
-      .then(resp => {
-        console.log("resp", resp);
-        if (resp !== "nice") {
-          if (md5(user_password + "|admin") === resp) {
-            console.log("a--GET_HASH");
-            hash_pwd = hash_admin;
-          } else {
-            if (md5(user_password + "|user") === resp) {
-              console.log("b--GET_HASH");
-              hash_pwd = hash_user;
-            } else {
-              console.log("c--GET_HASH");
-              hash_pwd = user_password;
-            }
-          }
-        }
-        event.returnValue = hash_pwd;
-      })
-      .catch(function(err) {
-        console.log(err);
-      });
+    console.log("ipc HASH", { user_login, user_password });
+    const result = getHash(user_login, user_password);
+    event.returnValue = result;
+    // event.reply("GETTING_HASH", result);
   });
 };

@@ -11,7 +11,7 @@ class ErrorMsgBD extends Component {
     return (
       <div /*className="cp-ua-auth_main_container"*/>
         {/*<div className="cp-ua-auth_form">*/}
-        <div>{"No files, administrator required"}</div>
+        <div>{this.props.mes}</div>
         {/*</div>*/}
       </div>
     );

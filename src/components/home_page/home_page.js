@@ -18,26 +18,21 @@ class HomePage extends Component {
       new_pwd: "",
       status_change_pwd: undefined
     };
-    // const status_pwd_success = new Notification("Status", {
-    //   body: "Your password has been successfully changed ",
-    //   silent: true
-    // });
   }
 
   componentDidMount() {
     console.log("componentDidMount --- HP", this.props.user_login);
-    console.log("AVATAR_USER", this.getUserAvatar(this.props.user_login));
+    console.log("componentDidMount --- HP_pwd", this.props.hash_password);
+    // console.log("AVATAR_USER", this.getUserAvatar(this.props.user_login));
     this.setState({ is_empty_dir: ipcRenderer.sendSync("CHECK_DIRECTORY", folderPath) });
+
     this.setState({
-      is_role: ipcRenderer.sendSync("CHECK_PASSWORD", this.props.user_login, this.props.user_password)
+      is_role: ipcRenderer.sendSync("GET_ROLE", this.props.user_login, this.props.hash_password)
     });
-
-    console.log("USERS", ipcRenderer.sendSync("GET_REG_USERS"));
-
-    // let Status = new Notification("Status", {
-    //   body: "Your password has been successfully changed ",
-    //   silent: true
-    // });
+    console.log(
+      "componentDidMount --- HP_role",
+      ipcRenderer.sendSync("GET_ROLE", this.props.user_login, this.props.hash_password)
+    );
   }
 
   // renderSelectDir = () => {
@@ -51,7 +46,9 @@ class HomePage extends Component {
   // };
 
   getUserList() {
-    return ipcRenderer.sendSync("GET_REG_USERS");
+    const result = ipcRenderer.sendSync("GET_REG_USERS");
+    console.log("RESULT", result);
+    return result;
   }
 
   getUserAvatar(user_login) {
@@ -111,15 +108,33 @@ class HomePage extends Component {
   }
 
   renderWorkPanelAdmin() {
-    const renderItems = this.getUserList().map((user, index) => (
-      <div className="cp-hp-list_reg_users-item" key={index} onClick={console.log("CLICK", user)}>
-        {user}
-      </div>
-    ));
+    console.log("12345678", this.getUserList());
+    // const renderItems = this.getUserList().map((user, index) => (
+    //     return(<div></div>
+    //
+    //
+    //   <div className="cp-hp-list_reg_users-item" key={index}>
+    //       <div className="cp-hp-request_btn-btn" onClick={console.log("CLICK", user)}>
+    //           {user}>
+    //       </div>
+    //   </div>
+    //
+    //
+    // )));
+
+    const renderItems = this.getUserList().map((user, index) => {
+      return (
+        <div className="cp-hp-list_reg_users-item" key={index}>
+          <div className="" onClick={() => console.log("CLICK")}>
+            {user}>
+          </div>
+        </div>
+      );
+    });
 
     return (
       <div className="cp-hp-user_workpanel-item_list">
-        <div className="cp-hp-item_list-header"> item list</div>
+        {/*<div className="cp-hp-item_list-header"> item list</div>*/}
         <div className="cp-hp-item_list-body">{renderItems}</div>
       </div>
     );
@@ -200,8 +215,7 @@ class HomePage extends Component {
       </div>
     );
   }
-
-  render() {
+  renderUserSpace() {
     return (
       <div className="cp-hp-main_container">
         {this.renderUserInfo()}
@@ -209,16 +223,20 @@ class HomePage extends Component {
           <div>WORK_panel</div>
           {this.state.is_change_pwd && this.renderChangePassword()}
           {this.state.is_role === "admin" && this.renderWorkPanelAdmin()}
-          {}
         </div>
       </div>
     );
+  }
+
+  render() {
+    return this.renderUserSpace();
+    // return this.props.user_password ? this.renderUserSpace() : <div>hello</div>;
   }
 }
 
 const mapStateToProps = state => ({
   user_login: state.user.login,
-  user_password: state.user.hash_password
+  hash_password: state.user.hash_password
   // selectedDirectory: state.file.selectedDirectory
 });
 

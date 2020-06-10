@@ -1,8 +1,10 @@
 // const {app, Notification} = require('electron');
 const fs = require("fs");
 const path = require("path");
+const md5 = require("md5");
 const notifier = require("node-notifier");
 const Buffer = require("buffer").Buffer;
+const { setPassword, getPassword, findCredentials } = require("keytar");
 
 // const async = require('async');
 // const hasha = require('hasha');
@@ -190,7 +192,7 @@ const decode_base64 = (base64str, path_file) => {
   });
 };
 
-const status_pwd = status => {
+const pwdStatus = status => {
   const icon_name = status ? "status_success.ico" : "status_error.ico";
   const title = status
     ? "Your password has been successfully changed!"
@@ -204,11 +206,68 @@ const status_pwd = status => {
   });
 };
 
+const getRole = (user, user_password) => {
+  // let role_user = "";
+  getPassword("course_project", user)
+    .then(resp => {
+      // console.log("GET_ROLE", resp);
+      if (md5(user_password + "|admin") === resp) {
+        console.log("a");
+        return "admin";
+      } else {
+        if (md5(user_password + "|user") === resp) {
+          console.log("b");
+          return "user";
+        } else {
+          console.log("c");
+          return "";
+        }
+      }
+      // console.log("ROLE", role_user);
+      // return role_user;
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+};
+
+const getHash = (user_login, user_password) => {
+  let hash = "";
+  getPassword("course_project", user_login)
+    .then(resp => {
+      console.log("GETHASH", resp);
+      if (md5(user_password + "|admin") === resp) {
+        console.log("a--GET_HASH");
+        hash = md5(user_password + "|admin");
+      } else {
+        if (md5(user_password + "|user") === resp) {
+          console.log("b--GET_HASH");
+          hash = md5(user_password + "|user");
+        } else {
+          console.log("c--GET_HASH");
+          hash = user_password;
+        }
+      }
+      return hash;
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+};
+
+// const checkPassword = (user_login, user_password) => {
+//
+//   // return hash === get_pwd;
+// };
+
 module.exports = {
   isDirSync,
   encode_base64,
   decode_base64,
-  status_pwd
+  pwdStatus,
+  getRole,
+  getHash
+  // checkPassword
   // getHashFile,
   // getAllFiles,
   // getFiles,
