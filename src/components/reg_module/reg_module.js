@@ -30,7 +30,7 @@ class RegModule extends Component {
     const is_reg_users_exist = ipcRenderer.sendSync("CHECK_REG_USERS");
     if (!is_reg_users_exist) {
       console.log("is_reg_users_exist-REG", false);
-      if (ipcRenderer.sendSync("CHECK_DIRECTORY", folderPath)) {
+      if (ipcRenderer.sendSync("CHECK_DIRECTORY")) {
         this.setState({ msg: "No files, administrator required", is_empty_dir: true });
       }
     } else {

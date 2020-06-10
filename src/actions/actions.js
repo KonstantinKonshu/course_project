@@ -12,6 +12,7 @@ export const setUser = (user_name, password) => {
 };
 
 export function setDirectory(dir) {
+  // ipcRenderer.sendSync("SET_DIRECTORY", dir);
   return {
     type: types.SET_DIRECTORY,
     payload: dir

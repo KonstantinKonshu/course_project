@@ -12,4 +12,4 @@ export const types = {
   // SELECT_CHANNEL: "SELECT_CHANNEL",
 };
 
-export const folderPath = "../File_store";
+// export const folderPath = "../File_store";

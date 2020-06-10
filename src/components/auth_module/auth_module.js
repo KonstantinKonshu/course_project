@@ -26,7 +26,7 @@ class AuthModule extends Component {
     if (!is_reg_users_exist) {
       // this.props.history.push("/registration");
     } else {
-      if (ipcRenderer.sendSync("CHECK_DIRECTORY", folderPath)) {
+      if (ipcRenderer.sendSync("CHECK_DIRECTORY")) {
         this.setState({ msg: "No files, administrator required", is_empty_dir: true });
       }
     }

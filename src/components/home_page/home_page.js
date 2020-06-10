@@ -24,7 +24,7 @@ class HomePage extends Component {
     console.log("componentDidMount --- HP", this.props.user_login);
     console.log("componentDidMount --- HP_pwd", this.props.hash_password);
     // console.log("AVATAR_USER", this.getUserAvatar(this.props.user_login));
-    this.setState({ is_empty_dir: ipcRenderer.sendSync("CHECK_DIRECTORY", folderPath) });
+    this.setState({ is_empty_dir: ipcRenderer.sendSync("CHECK_DIRECTORY") });
 
     this.setState({
       is_role: ipcRenderer.sendSync("GET_ROLE", this.props.user_login, this.props.hash_password)
@@ -34,16 +34,6 @@ class HomePage extends Component {
       ipcRenderer.sendSync("GET_ROLE", this.props.user_login, this.props.hash_password)
     );
   }
-
-  // renderSelectDir = () => {
-  //   return (
-  //     <div>
-  //       <h2> Select the path to the directory: </h2>
-  //       <button onClick={this.props.selectDirectory}>Select directory</button>
-  //       <h3>{`Selected directory: ${this.props.selectedDirectory}`}</h3>
-  //     </div>
-  //   );
-  // };
 
   getUserList() {
     const result = ipcRenderer.sendSync("GET_REG_USERS");
@@ -74,39 +64,6 @@ class HomePage extends Component {
     this.props.history.push("/");
   }
 
-  // renderStatusChanges() {
-  //   if (this.state.status_change_pwd === undefined) return undefined;
-  //
-  //   if (this.state.status_change_pwd) {
-  //     const myNotification = new Notification("Title", {
-  //       body: "Lorem Ipsum Dolor Sit Amet"
-  //     });
-  //   }
-  //   // return (
-  //   //   <div className="cp-hp-block_status">
-  //   //     <div></div>
-  //   //   </div>
-  //   // );
-  //
-  //   return (
-  //     <div>
-  //       <div></div>
-  //     </div>
-  //   );
-  // }
-
-  renderListRegUser() {
-    const users = this.getUserList().map((user, index) => (
-      <div className="cp-hp-list_reg_users-item" key={index}>
-        {/*<div className={"dir-table__td"} >*/}
-        {user}
-        {/*</div>*/}
-      </div>
-    ));
-
-    return <div className="cp-hp-list_reg_users">{users}</div>;
-  }
-
   renderWorkPanelAdmin() {
     const renderItems = this.getUserList().map((user, index) => {
       return (
@@ -119,13 +76,31 @@ class HomePage extends Component {
       );
     });
 
-    return (
-      <div className="cp-hp-user_workpanel-user_list">
-        <div className="cp-hp-item_list-header">
-          <div className="cp-hp-user_list-item_title">User</div>
-          <div className="cp-hp-user_list-item_info">Action</div>
+    const renderBtnChangeDir = () => {
+      return (
+        <div
+          className="cp-hp-request_btn-btn"
+          onClick={() => {
+            console.log("Hello btn");
+            this.props.selectDirectory();
+            // this.setState({ is_change_pwd: !this.state.is_change_pwd });
+          }}
+        >
+          Create_directory
         </div>
-        <div className="cp-hp-user_list-body">{renderItems}</div>
+      );
+    };
+
+    return (
+      <div>
+        {true && renderBtnChangeDir()}
+        <div className="cp-hp-user_workpanel-user_list">
+          <div className="cp-hp-item_list-header">
+            <div className="cp-hp-user_list-item_title">User</div>
+            <div className="cp-hp-user_list-item_info">Action</div>
+          </div>
+          <div className="cp-hp-user_list-body">{renderItems}</div>
+        </div>
       </div>
     );
   }
@@ -233,7 +208,8 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   // handleSubmitInit: bindActionCreators(handleSubmitInit, dispatch),
   // getRequestSearch: bindActionCreators(getRequestSearch, dispatch),
-  setUser: bindActionCreators(setUser, dispatch)
+  setUser: bindActionCreators(setUser, dispatch),
+  selectDirectory: bindActionCreators(selectDirectory, dispatch)
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomePage);

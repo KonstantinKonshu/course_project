@@ -16,22 +16,37 @@ const Store = require("electron-store");
 const store = new Store();
 module.exports = () => {
   ipcMain.handle("SELECT_DIRECTORY", event => {
-    return dialog.showOpenDialogSync(getWindow("main"), {
+    // store.set(
+    //   "directory",
+    const directorySpace = dialog.showOpenDialogSync(getWindow("main"), {
       properties: ["openDirectory"]
     });
+    // );
+    fs.mkdirSync(path.join(directorySpace[0], "File_store"));
+    store.set("directory", path.join(directorySpace[0], "File_store"));
+    console.log("DIR", store.get("directory"));
+    return store.get("directory");
   });
 
-  ipcMain.on("CHECK_DIRECTORY", (event, folder_patch) => {
-    console.log("folder_patch", folder_patch);
-    if (!isDirSync(folder_patch)) {
-      console.log("TR");
-      // this.setState({ is_empty_dir: true });
-      // fs.mkdirSync(folder_patch);
-      event.returnValue = true;
-    } else {
-      console.log("FL");
-      event.returnValue = false;
-    }
+  // ipcMain.on("SET_DIRECTORY", (event, dir) => {
+  //   store.set("directory", dir);
+  // });
+
+  ipcMain.on("CHECK_DIRECTORY", event => {
+    console.log("folder_patch", store.get("directory"));
+    if (store.get("directory")) {
+      if (!isDirSync(store.get("directory"))) {
+        console.log("TR");
+
+        store.delete("directory");
+        // this.setState({ is_empty_dir: true });
+        // fs.mkdirSync(folder_patch);
+        event.returnValue = true;
+      } else {
+        console.log("FL");
+        event.returnValue = false;
+      }
+    } else event.returnValue = false;
   });
 
   ipcMain.on("GET_ROLE", (event, user, pass) => {
