@@ -19,67 +19,60 @@ class RegModule extends Component {
       login_user: "",
       password: "",
       is_empty_dir: false,
-      is_no_reg: false
+      msg: ""
+      // required_admin: false
+      // is_no_registration: false
     };
   }
 
   componentDidMount() {
-    console.log("componentDidMount");
-
-    // console.log("123456", encrypt("SOCIATE_MINERALE"));
-    // console.log("123456", ipcRenderer.sendSync("check_directory", folderPath));
-    this.setState({ is_empty_dir: ipcRenderer.sendSync("CHECK_DIRECTORY", folderPath) });
-    // console.log("is_empty_dir", this.state.is_empty_dir);
+    console.log("componentDidMount---RegModule");
+    const is_reg_users_exist = ipcRenderer.sendSync("CHECK_REG_USERS");
+    if (!is_reg_users_exist) {
+      console.log("is_reg_users_exist-REG", false);
+      if (ipcRenderer.sendSync("CHECK_DIRECTORY", folderPath)) {
+        this.setState({ msg: "No files, administrator required", is_empty_dir: true });
+      }
+    } else {
+      console.log("TRUE ))))");
+      // this.setState({ required_admin: true });
+    }
   }
 
-  // checkAuth() {
-  //   // if (this.state.is_empty_dir && this.state.login_user === "admin" && this.state.password === "admin") {
-  //   //   this.props.setUser(this.state.login_user, this.state.password);
-  //   //   this.props.history.push("/home");
-  //   // }
-  //   // const dir = path.join(folderPath);
-  //   // console.log("existsSync", fs.existsSync(folderPath));
-  //   // if (!fs.existsSync(folderPath)) {
-  //   // fs.mkdirSync(folderPath);
-  //   // }
-  // }
-
-  // regAdmin() {
-  //   const res = ipcRenderer.sendSync("CHECK_AUTH_USER", this.state.login_user, this.state.password);
-  //   console.log(
-  //     "regAdmin",
-  //     ipcRenderer.sendSync("CHECK_AUTH_USER", this.state.login_user, this.state.password)
-  //   );
-  //   if (res) {
-  //     this.props.setUser(this.state.login_user, this.state.password);
-  //     console.log("YES");
-  //     this.props.history.push("/home");
-  //   } else {
-  //     console.log("NO");
-  //     this.setState({
-  //       is_no_reg: true,
-  //       password: ""
-  //     });
-  //   }
-  // }
-
   checkRegistration() {
-    const res = ipcRenderer.sendSync("CHECK_AUTH_USER", this.state.login_user, this.state.password);
-    console.log(
-      "regAdmin",
-      ipcRenderer.sendSync("CHECK_AUTH_USER", this.state.login_user, this.state.password)
-    );
-    if (res) {
-      this.props.setUser(this.state.login_user, this.state.password);
-      console.log("YES");
-      this.props.history.push("/home");
+    const is_exist = ipcRenderer.sendSync("CHECK_USER_EXIST", this.state.login_user);
+    if (is_exist) {
+      //он уже сушществует
+      console.log("0000", is_exist);
+      this.setState({ msg: "A user with this login already exists.", password: "" });
     } else {
-      console.log("NO");
-      this.setState({
-        is_no_reg: true,
-        password: ""
-      });
+      // можно регать
+      if (
+        ipcRenderer.sendSync(
+          "REGISTRATION_USER",
+          this.state.login_user,
+          this.state.password,
+          this.state.is_empty_dir
+        )
+      ) {
+        this.props.setUser(this.state.login_user, this.state.password);
+        console.log("YES");
+        this.props.history.push("/home");
+      }
     }
+
+    // const is_check_auth_user = ipcRenderer.sendSync("CHECK_AUTH_USER", this.state.login_user, this.state.password);
+    // if (res) {
+    //   this.props.setUser(this.state.login_user, this.state.password);
+    //   console.log("YES");
+    //   this.props.history.push("/home");
+    // } else {
+    //   console.log("NO");
+    //   this.setState({
+    //     // is_no_registration: true,
+    //     password: ""
+    //   });
+    // }
   }
 
   render() {
@@ -89,8 +82,6 @@ class RegModule extends Component {
       <div className="cp-ua-auth_main_container">
         <div className="cp-ua-auth_form">
           <div className="cp-ua-auth_form-header">Registration</div>
-
-          {this.state.is_no_reg && <ErrorMsgBD mes={"Data entered incorrectly"} />}
 
           <input
             name="login"
@@ -122,7 +113,6 @@ class RegModule extends Component {
             onClick={() => {
               console.log("Hello btn");
               this.checkRegistration();
-              // this.state.is_empty_dir ? this.regAdmin() : this.checkAuth();
             }}
           >
             Register
@@ -137,7 +127,7 @@ class RegModule extends Component {
             Back
           </div>
 
-          {this.state.is_empty_dir && <ErrorMsgBD mes={"No files, administrator required"} />}
+          <ErrorMsgBD mes={this.state.msg} />
         </div>
       </div>
     );
@@ -145,11 +135,6 @@ class RegModule extends Component {
 }
 
 const mapStateToProps = state => ({
-  // searchRouting: state.routing.locationBeforeTransitions.search,
-  // routeName: state.routing.locationBeforeTransitions.pathname,
-  // searchName: state.videosReducer.search,
-  // prevPageToken: state.tokensReducer.prevPageToken,
-  // nextPageToken: state.tokensReducer.nextPageToken,
   // channelId: state.channelsReducer.channelId
 });
 const mapDispatchToProps = dispatch => ({

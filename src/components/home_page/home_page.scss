@@ -48,20 +48,6 @@
   height: 100%;
 }
 
-.cp-hp-user_workpanel-item_list {
-  width: 100%;
-  color: black;
-  background-color: #cccccc;
-  border: 1px solid #cccccc;
-
-  & > *:nth-child(2n + 1) {
-    background-color: inherit;
-  }
-  & > *:nth-child(2n + 0) {
-    background-color: #ececec;
-  }
-}
-
 //================= user_info ================================
 .cp-hp-user_info {
   display: flex;
@@ -138,4 +124,42 @@
 
 .cp-hp-change_pwd-btn {
   @extend .cp-hp-request_btn-btn;
+}
+
+//================= render_Work_Panel_Admin ================================
+.cp-hp-user_workpanel-user_list {
+  width: calc(100% - 20px);
+  margin: 10px;
+  color: black;
+  background-color: #cccccc;
+  border: 1px solid #cccccc;
+
+  & > *:nth-child(2n + 1) {
+    background-color: inherit;
+  }
+  & > *:nth-child(2n + 0) {
+    background-color: #ececec;
+  }
+}
+.cp-hp-item_list-header {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  //justify-content: center;
+  //align-items: center;
+}
+
+.cp-hp-user_list-item {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.cp-hp-user_list-item_title {
+  display: flex;
+  width: 30%;
+}
+.cp-hp-user_list-item_info {
+  display: flex;
+  width: 70%;
 }

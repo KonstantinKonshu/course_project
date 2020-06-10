@@ -108,34 +108,24 @@ class HomePage extends Component {
   }
 
   renderWorkPanelAdmin() {
-    console.log("12345678", this.getUserList());
-    // const renderItems = this.getUserList().map((user, index) => (
-    //     return(<div></div>
-    //
-    //
-    //   <div className="cp-hp-list_reg_users-item" key={index}>
-    //       <div className="cp-hp-request_btn-btn" onClick={console.log("CLICK", user)}>
-    //           {user}>
-    //       </div>
-    //   </div>
-    //
-    //
-    // )));
-
     const renderItems = this.getUserList().map((user, index) => {
       return (
-        <div className="cp-hp-list_reg_users-item" key={index}>
-          <div className="" onClick={() => console.log("CLICK")}>
-            {user}>
+        <div className="cp-hp-user_list-item" key={index}>
+          <div className="cp-hp-user_list-item_title">{user}</div>
+          <div className="cp-hp-user_list-item_info" onClick={() => console.log("CLICK")}>
+            View
           </div>
         </div>
       );
     });
 
     return (
-      <div className="cp-hp-user_workpanel-item_list">
-        {/*<div className="cp-hp-item_list-header"> item list</div>*/}
-        <div className="cp-hp-item_list-body">{renderItems}</div>
+      <div className="cp-hp-user_workpanel-user_list">
+        <div className="cp-hp-item_list-header">
+          <div className="cp-hp-user_list-item_title">User</div>
+          <div className="cp-hp-user_list-item_info">Action</div>
+        </div>
+        <div className="cp-hp-user_list-body">{renderItems}</div>
       </div>
     );
   }

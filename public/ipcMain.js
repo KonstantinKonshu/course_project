@@ -60,12 +60,15 @@ module.exports = () => {
       });
   });
 
-  ipcMain.on("CHECK_AUTH_USER", (event, user_login, user_password) => {
+  ipcMain.on("CHECK_AUTH_USER", (event, user_login, user_password, is_empty_dir) => {
     getPassword("course_project", user_login)
       .then(resp => {
         console.log("checkPassword", resp);
-
-        event.returnValue = md5(user_password + "|admin") === resp || md5(user_password + "|user") === resp;
+        if (is_empty_dir) {
+          event.returnValue = md5(user_password + "|admin") === resp;
+        } else {
+          event.returnValue = md5(user_password + "|admin") === resp || md5(user_password + "|user") === resp;
+        }
       })
       .catch(function(err) {
         console.log(err);
@@ -140,5 +143,55 @@ module.exports = () => {
     const result = getHash(user_login, user_password);
     event.returnValue = result;
     // event.reply("GETTING_HASH", result);
+  });
+
+  ipcMain.on("CHECK_USER_EXIST", (event, user_login) => {
+    console.log("CHECK_USER_EXIST", user_login);
+    findCredentials("course_project")
+      .then(response => {
+        const user = response.filter(user => user.account === user_login);
+        if (user.length) {
+          console.log("CHECK_USER_EXIST--len", user.length);
+          event.returnValue = true;
+        } else {
+          event.returnValue = false;
+          // if (user !== []) event.returnValue = true;
+          // else event.returnValue = false;
+        }
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+  });
+
+  ipcMain.on("REGISTRATION_USER", (event, user_login, user_password, is_empty_dir) => {
+    let hash_pwd;
+    if (is_empty_dir) hash_pwd = md5(user_password + "|admin");
+    else hash_pwd = md5(user_password + "|user");
+
+    setPassword("course_project", user_login, hash_pwd)
+      .then(() => {
+        event.returnValue = true;
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+  });
+
+  ipcMain.on("CHECK_REG_USERS", event => {
+    findCredentials("course_project")
+      .then(response => {
+        console.log("CHECK_REG_USERS", response);
+        const users = response.map(user => user.account);
+        if (users.length) {
+          console.log("CHECK_REG_USERS--len", users.length);
+          event.returnValue = true;
+        } else {
+          event.returnValue = false;
+        }
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
   });
 };
