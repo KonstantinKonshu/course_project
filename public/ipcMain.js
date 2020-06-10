@@ -46,23 +46,25 @@ module.exports = () => {
         console.log("FL");
         event.returnValue = false;
       }
-    } else event.returnValue = false;
+    } else event.returnValue = true;
   });
 
-  ipcMain.on("GET_ROLE", (event, user, pass) => {
-    console.log("ipc GET_ROLE", { user, pass });
+  ipcMain.on("GET_ROLE", (event, user_login, user_password) => {
+    console.log("ipc GET_ROLE", { user_login, user_password });
     // const result = getRole(user, pass);
     // console.log("09876543", result);
     // event.returnValue = result;
-    getPassword("course_project", user)
+    getPassword("course_project", user_login)
       .then(resp => {
         // console.log("GET_ROLE", resp);
-        if (md5(pass + "|admin") === resp) {
+        if (md5(user_password + "|admin") === resp) {
           console.log("a");
+          store.set("current_user", { login: user_login, password: user_password });
           event.returnValue = "admin";
         } else {
-          if (md5(pass + "|user") === resp) {
+          if (md5(user_password + "|user") === resp) {
             console.log("b");
+            store.set("current_user", { login: user_login, password: user_password });
             event.returnValue = "user";
           } else {
             console.log("c");
@@ -208,5 +210,60 @@ module.exports = () => {
       .catch(function(err) {
         console.log(err);
       });
+  });
+
+  ipcMain.on("GET_USER_FILES", event => {
+    const user = store.get("current_user");
+
+    // fs.readdirSync(path.join("")).forEach(file => {
+    //   console.log(file);
+    // });
+
+    if (store.get("directory")) {
+      if (!isDirSync(path.join(store.get("directory"), `${user.login}_folder`))) {
+        console.log("NO_directory");
+        //директории нет
+
+        event.returnValue = [];
+      } else {
+        //директория есть
+        console.log("YES_directory");
+        const files = fs.readdirSync(path.join(store.get("directory"), `${user.login}_folder`));
+        console.log("FILES", files);
+        event.returnValue = files;
+        // event.returnValue = undefined;
+      }
+    } else event.returnValue = [];
+  });
+
+  ipcMain.handle("ADD_FILES", event => {
+    const user = store.get("current_user");
+    if (store.get("directory")) {
+      if (!isDirSync(path.join(store.get("directory"), `${user.login}_folder`))) {
+        console.log("NO_directory");
+        //директории нет
+        fs.mkdirSync(path.join(store.get("directory"), `${user.login}_folder`));
+      }
+
+      const selected_file = dialog.showOpenDialogSync(getWindow("main"), {
+        properties: ["openDirectory", "openFile"]
+      });
+      console.log("select_file", selected_file);
+      // path.dirname(selected_file[0]);
+      fs.createReadStream(selected_file[0]).pipe(
+        fs.createWriteStream(
+          path.join(
+            path.join(store.get("directory"), `${user.login}_folder`),
+            path.basename(selected_file[0])
+          )
+        )
+      );
+      event.returnValue = true;
+    } else event.returnValue = undefined;
+  });
+
+  ipcMain.on("EXIT", event => {
+    store.delete("current_user");
+    event.returnValue = true;
   });
 };

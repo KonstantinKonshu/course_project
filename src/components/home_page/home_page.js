@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { selectDirectory, setUser } from "../../actions/actions";
+import { selectDirectory, selectFile, setUser } from "../../actions/actions";
 // import { status_pwd_success } from "../../constants";
 import "./home_page.scss";
 import { folderPath } from "../../constants";
@@ -61,7 +61,7 @@ class HomePage extends Component {
 
   handleOnClickExit() {
     setUser(null, null);
-    this.props.history.push("/");
+    if (ipcRenderer.sendSync("EXIT")) this.props.history.push("/");
   }
 
   renderWorkPanelAdmin() {
@@ -94,13 +94,81 @@ class HomePage extends Component {
     return (
       <div>
         {true && renderBtnChangeDir()}
-        <div className="cp-hp-user_workpanel-user_list">
+        <div className="cp-hp-admin_workpanel-user_list">
           <div className="cp-hp-item_list-header">
             <div className="cp-hp-user_list-item_title">User</div>
             <div className="cp-hp-user_list-item_info">Action</div>
           </div>
           <div className="cp-hp-user_list-body">{renderItems}</div>
         </div>
+      </div>
+    );
+  }
+
+  getUserFile() {
+    const result = ipcRenderer.sendSync("GET_USER_FILES");
+    console.log("RESULT", result);
+    return result;
+  }
+
+  // AddFiles() {
+  //   return async () => {
+  //     try {
+  //       const dir = await ipcRenderer.invoke("ADD_FILES");
+  //       console.error("sele", dir);
+  //       // dispatch(setDirectory(dir ? dir : null));
+  //     } catch (e) {
+  //       console.error(e);
+  //       // dispatch(setDirectory(null));
+  //     }
+  //   };
+  // }
+
+  renderWorkPanelUser() {
+    // const renderFiles = this.getUserFile().map((file, index) => {
+    //   return (
+    //     <div className="cp-hp-user_list-item" key={index}>
+    //       <div className="cp-hp-user_list-item_title">{file}</div>
+    //       <div className="cp-hp-user_list-item_info" onClick={() => console.log("CLICK")}>
+    //         View
+    //       </div>
+    //     </div>
+    //   );
+    // });
+
+    const renderBtnAddFiles = () => {
+      return (
+        <div
+          className="cp-hp-request_btn-btn"
+          onClick={async () => {
+            console.log("Hello btn");
+            this.props.selectFile();
+            // try {
+            //   const select_files = await ipcRenderer.invoke("ADD_FILES");
+            //   if (select_files) {
+            //     console.log("select", select_files);
+            //   }
+            //   // dispatch(setDirectory(dir ? dir : null));
+            // } catch (e) {
+            //   console.error(e);
+            //   // dispatch(setDirectory(null));
+            // }
+
+            // ipcRenderer.sendSync("ADD_FILES")
+            // this.props.selectDirectory();
+            // this.setState({ is_change_pwd: !this.state.is_change_pwd });
+          }}
+        >
+          Add_files
+        </div>
+      );
+    };
+
+    return (
+      <div className="cp-hp-user_workpanel">
+        <div>user</div>
+        {/*<div className="cp-hp-user_workpanel-file_list">{renderFiles}</div>*/}
+        <div className="cp-hp-user_workpanel-btn_load_file">{renderBtnAddFiles()}</div>
       </div>
     );
   }
@@ -138,11 +206,10 @@ class HomePage extends Component {
       </div>
     );
   }
-  // renderWorkPanelUser() {}
 
   renderChangePassword() {
     return (
-      <div className="cp-hp-user_workpanel-change_pwd">
+      <div className="cp-hp-workpanel-change_pwd">
         {/*{this.renderStatusChanges()}*/}
         <input
           name="old_password"
@@ -184,10 +251,10 @@ class HomePage extends Component {
     return (
       <div className="cp-hp-main_container">
         {this.renderUserInfo()}
-        <div className="cp-hp-user_workpanel">
+        <div className="cp-hp-workpanel">
           <div>WORK_panel</div>
           {this.state.is_change_pwd && this.renderChangePassword()}
-          {this.state.is_role === "admin" && this.renderWorkPanelAdmin()}
+          {this.state.is_role === "admin" ? this.renderWorkPanelAdmin() : this.renderWorkPanelUser()}
         </div>
       </div>
     );
@@ -209,7 +276,8 @@ const mapDispatchToProps = dispatch => ({
   // handleSubmitInit: bindActionCreators(handleSubmitInit, dispatch),
   // getRequestSearch: bindActionCreators(getRequestSearch, dispatch),
   setUser: bindActionCreators(setUser, dispatch),
-  selectDirectory: bindActionCreators(selectDirectory, dispatch)
+  selectDirectory: bindActionCreators(selectDirectory, dispatch),
+  selectFile: bindActionCreators(selectFile, dispatch)
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomePage);

@@ -41,7 +41,7 @@
 }
 
 //==================user_workpanel ==========================
-.cp-hp-user_workpanel {
+.cp-hp-workpanel {
   display: flex;
   flex-direction: column;
   width: 60%;
@@ -105,7 +105,7 @@
 }
 
 //================= workpannel_change_pwd ================================
-.cp-hp-user_workpanel-change_pwd {
+.cp-hp-workpanel-change_pwd {
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -127,7 +127,7 @@
 }
 
 //================= render_Work_Panel_Admin ================================
-.cp-hp-user_workpanel-user_list {
+.cp-hp-admin_workpanel-user_list {
   width: calc(100% - 20px);
   margin: 10px;
   color: black;

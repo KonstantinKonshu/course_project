@@ -30,6 +30,21 @@ export function selectDirectory() {
     }
   };
 }
+
+export function selectFile() {
+  return async dispatch => {
+    try {
+      console.log("9999");
+      const dir = await ipcRenderer.invoke("ADD_FILES");
+      console.log(dir);
+      // dispatch(setDirectory(dir ? dir : null));
+    } catch (e) {
+      console.error(e);
+      // dispatch(setDirectory(null));
+    }
+  };
+}
+
 // export const selectDirectories = data => {
 //
 //   return async dispatch => {
