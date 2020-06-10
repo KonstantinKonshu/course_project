@@ -1,4 +1,5 @@
 const { app, ipcMain, dialog } = require("electron");
+const { shell } = require("electron");
 // const default_avatar = require("./user_default_img.png");
 // const {getJob} = require('./job.js')
 // const promiseLimit = require('promise-limit');
@@ -126,6 +127,11 @@ module.exports = () => {
     }
   });
 
+  ipcMain.on("GET_EYE", event => {
+    const img_eye = fs.readFileSync(path.resolve(__dirname, "eye_visible.ico"), "base64");
+    event.returnValue = img_eye;
+  });
+
   ipcMain.on("CHANGE_PASSWORD", (event, user_login, new_password, old_password) => {
     const old_hash_admin = md5(old_password + "|admin");
     const old_hash_user = md5(old_password + "|user");
@@ -215,11 +221,12 @@ module.exports = () => {
   ipcMain.on("GET_USER_FILES", event => {
     const user = store.get("current_user");
 
+    console.log("USERUSER", user);
     // fs.readdirSync(path.join("")).forEach(file => {
     //   console.log(file);
     // });
 
-    if (store.get("directory")) {
+    if (store.get("directory") && user) {
       if (!isDirSync(path.join(store.get("directory"), `${user.login}_folder`))) {
         console.log("NO_directory");
         //директории нет
@@ -252,14 +259,23 @@ module.exports = () => {
       // path.dirname(selected_file[0]);
       fs.createReadStream(selected_file[0]).pipe(
         fs.createWriteStream(
-          path.join(
-            path.join(store.get("directory"), `${user.login}_folder`),
-            path.basename(selected_file[0])
-          )
+          path.join(store.get("directory"), `${user.login}_folder`, path.basename(selected_file[0]))
+          // path.join(
+          //   path.join(store.get("directory"), `${user.login}_folder`),
+          //   path.basename(selected_file[0])
+          // )
         )
       );
       event.returnValue = true;
     } else event.returnValue = undefined;
+  });
+
+  ipcMain.on("OPEN_FILE", (event, file_name) => {
+    // const user = store.get("current_user");
+    // if (store.get("directory") && user) {
+    // }
+    // require("electron").shell.openItem(path.join(store.get("directory"), `${user.login}_folder`, file_name));
+    event.returnValue = false;
   });
 
   ipcMain.on("EXIT", event => {

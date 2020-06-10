@@ -40,7 +40,7 @@
   }
 }
 
-//==================user_workpanel ==========================
+//================== workpanel ==========================
 .cp-hp-workpanel {
   display: flex;
   flex-direction: column;
@@ -162,4 +162,44 @@
 .cp-hp-user_list-item_info {
   display: flex;
   width: 70%;
+}
+
+//================= render_Work_Panel_USER ================================
+.cp-hp-user_workpanel-file_list {
+  @extend .cp-hp-admin_workpanel-user_list;
+  & > div:not(:last-child) {
+    border-bottom: 1px solid black;
+  }
+}
+.cp-hp-user_workpanel-header {
+  display: flex;
+  font-size: 23px;
+  justify-content: center;
+  flex-direction: row;
+  width: 100%;
+}
+
+.cp-hp-file_list-item {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.cp-hp-file_list-item_title {
+  display: flex;
+  align-items: center;
+  width: calc(100% - 35px);
+  margin-left: 5px;
+}
+.cp-hp-file_list-item_info {
+  display: flex;
+  width: 30px;
+  & img {
+    display: flex;
+    width: 30px;
+  }
+}
+
+.cp-hp-user_workpanel-btn_load_file {
+  @extend .cp-hp-request_btn-btn;
 }

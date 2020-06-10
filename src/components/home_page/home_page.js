@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { selectDirectory, selectFile, setUser } from "../../actions/actions";
+import { selectDirectory, addFile, setUser } from "../../actions/actions";
 // import { status_pwd_success } from "../../constants";
 import "./home_page.scss";
 import { folderPath } from "../../constants";
@@ -16,7 +16,8 @@ class HomePage extends Component {
       is_change_pwd: false,
       old_pwd: "",
       new_pwd: "",
-      status_change_pwd: undefined
+      status_change_pwd: undefined,
+      getting_files: []
     };
   }
 
@@ -33,6 +34,7 @@ class HomePage extends Component {
       "componentDidMount --- HP_role",
       ipcRenderer.sendSync("GET_ROLE", this.props.user_login, this.props.hash_password)
     );
+    this.getUserFile();
   }
 
   getUserList() {
@@ -106,57 +108,41 @@ class HomePage extends Component {
   }
 
   getUserFile() {
-    const result = ipcRenderer.sendSync("GET_USER_FILES");
-    console.log("RESULT", result);
-    return result;
+    this.setState({
+      getting_files: ipcRenderer.sendSync("GET_USER_FILES")
+    });
+    // const result = ipcRenderer.sendSync("GET_USER_FILES");
+    // console.log("RESULT", result);
+    // return result;
   }
 
-  // AddFiles() {
-  //   return async () => {
-  //     try {
-  //       const dir = await ipcRenderer.invoke("ADD_FILES");
-  //       console.error("sele", dir);
-  //       // dispatch(setDirectory(dir ? dir : null));
-  //     } catch (e) {
-  //       console.error(e);
-  //       // dispatch(setDirectory(null));
-  //     }
-  //   };
-  // }
-
   renderWorkPanelUser() {
-    // const renderFiles = this.getUserFile().map((file, index) => {
-    //   return (
-    //     <div className="cp-hp-user_list-item" key={index}>
-    //       <div className="cp-hp-user_list-item_title">{file}</div>
-    //       <div className="cp-hp-user_list-item_info" onClick={() => console.log("CLICK")}>
-    //         View
-    //       </div>
-    //     </div>
-    //   );
-    // });
+    const renderFiles = this.state.getting_files.map((file, index) => {
+      return (
+        <div className="cp-hp-file_list-item" key={index}>
+          <div className="cp-hp-file_list-item_title">{file}</div>
+          <div className="cp-hp-file_list-item_info">
+            <img
+              src={`data:image/png;base64,${ipcRenderer.sendSync("GET_EYE")}`}
+              alt="eye"
+              onClick={() => {
+                console.log("CLICK");
+                ipcRenderer.sendSync("OPEN_FILE", file);
+              }}
+            />
+          </div>
+        </div>
+      );
+    });
 
     const renderBtnAddFiles = () => {
       return (
         <div
-          className="cp-hp-request_btn-btn"
-          onClick={async () => {
+          className="cp-hp-user_workpanel-btn_load_file"
+          onClick={() => {
             console.log("Hello btn");
-            this.props.selectFile();
-            // try {
-            //   const select_files = await ipcRenderer.invoke("ADD_FILES");
-            //   if (select_files) {
-            //     console.log("select", select_files);
-            //   }
-            //   // dispatch(setDirectory(dir ? dir : null));
-            // } catch (e) {
-            //   console.error(e);
-            //   // dispatch(setDirectory(null));
-            // }
-
-            // ipcRenderer.sendSync("ADD_FILES")
-            // this.props.selectDirectory();
-            // this.setState({ is_change_pwd: !this.state.is_change_pwd });
+            this.props.addFile();
+            this.getUserFile();
           }}
         >
           Add_files
@@ -166,9 +152,9 @@ class HomePage extends Component {
 
     return (
       <div className="cp-hp-user_workpanel">
-        <div>user</div>
-        {/*<div className="cp-hp-user_workpanel-file_list">{renderFiles}</div>*/}
-        <div className="cp-hp-user_workpanel-btn_load_file">{renderBtnAddFiles()}</div>
+        <div className="cp-hp-user_workpanel-header">My Files</div>
+        <div className="cp-hp-user_workpanel-file_list">{renderFiles}</div>
+        {renderBtnAddFiles()}
       </div>
     );
   }
@@ -277,7 +263,7 @@ const mapDispatchToProps = dispatch => ({
   // getRequestSearch: bindActionCreators(getRequestSearch, dispatch),
   setUser: bindActionCreators(setUser, dispatch),
   selectDirectory: bindActionCreators(selectDirectory, dispatch),
-  selectFile: bindActionCreators(selectFile, dispatch)
+  addFile: bindActionCreators(addFile, dispatch)
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomePage);

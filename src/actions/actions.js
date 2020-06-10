@@ -31,7 +31,7 @@ export function selectDirectory() {
   };
 }
 
-export function selectFile() {
+export function addFile() {
   return async dispatch => {
     try {
       console.log("9999");
