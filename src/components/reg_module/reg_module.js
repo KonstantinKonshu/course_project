@@ -112,7 +112,9 @@ class RegModule extends Component {
             className="cp-ua-auth_form-btn_login"
             onClick={() => {
               console.log("Hello btn");
-              this.checkRegistration();
+              this.state.login_user && this.state.password
+                ? this.checkRegistration()
+                : this.setState({ msg: "Fill in the fields" });
             }}
           >
             Register

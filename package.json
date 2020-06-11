@@ -13,10 +13,12 @@
     "electron-builder": "^22.7.0",
     "electron-is-dev": "^1.2.0",
     "electron-store": "^5.2.0",
+    "fs-temp": "^1.2.1",
     "keytar": "^6.0.1",
     "md5": "^2.2.1",
     "node-notifier": "^7.0.1",
     "node-sass": "^4.14.1",
+    "open": "^7.0.4",
     "prettier": "^1.15.3",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -25,6 +27,7 @@
     "react-scripts": "3.4.1",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
+    "tmp": "^0.2.1",
     "wait-on": "^5.0.0"
   },
   "scripts": {

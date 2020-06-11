@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { selectDirectory, addFile, setUser } from "../../actions/actions";
+import { selectDirectory, addFile, setUser, openFile } from "../../actions/actions";
 // import { status_pwd_success } from "../../constants";
 import "./home_page.scss";
 import { folderPath } from "../../constants";
@@ -127,7 +127,7 @@ class HomePage extends Component {
               alt="eye"
               onClick={() => {
                 console.log("CLICK");
-                ipcRenderer.sendSync("OPEN_FILE", file);
+                this.props.openFile(file);
               }}
             />
           </div>
@@ -263,7 +263,8 @@ const mapDispatchToProps = dispatch => ({
   // getRequestSearch: bindActionCreators(getRequestSearch, dispatch),
   setUser: bindActionCreators(setUser, dispatch),
   selectDirectory: bindActionCreators(selectDirectory, dispatch),
-  addFile: bindActionCreators(addFile, dispatch)
+  addFile: bindActionCreators(addFile, dispatch),
+  openFile: bindActionCreators(openFile, dispatch)
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomePage);

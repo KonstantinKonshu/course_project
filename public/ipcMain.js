@@ -1,28 +1,22 @@
 const { app, ipcMain, dialog } = require("electron");
-const { shell } = require("electron");
-// const default_avatar = require("./user_default_img.png");
-// const {getJob} = require('./job.js')
-// const promiseLimit = require('promise-limit');
 const path = require("path");
-// const fsp = require('fs').promises;
 const fs = require("fs");
 const md5 = require("md5");
+const open = require("open");
+const crypto = require("crypto");
+// const temp = require("fs-temp");
+const tmp = require("tmp");
 const { setPassword, getPassword, findCredentials } = require("keytar");
-// const {CronTime} = require('cron');
 const { getWindow } = require("./window.js");
-const { isDirSync, pwdStatus, getRole, getHash } = require("./helpers");
+const { isDirSync, pwdStatus, getRole, getHash, openSelectFile } = require("./helpers");
 const Store = require("electron-store");
 
-// const limit = promiseLimit(5);
 const store = new Store();
 module.exports = () => {
   ipcMain.handle("SELECT_DIRECTORY", event => {
-    // store.set(
-    //   "directory",
     const directorySpace = dialog.showOpenDialogSync(getWindow("main"), {
       properties: ["openDirectory"]
     });
-    // );
     fs.mkdirSync(path.join(directorySpace[0], "File_store"));
     store.set("directory", path.join(directorySpace[0], "File_store"));
     console.log("DIR", store.get("directory"));
@@ -60,12 +54,12 @@ module.exports = () => {
         // console.log("GET_ROLE", resp);
         if (md5(user_password + "|admin") === resp) {
           console.log("a");
-          store.set("current_user", { login: user_login, password: user_password });
+          store.set("current_user", { login: user_login, password: md5(user_password + "|admin") });
           event.returnValue = "admin";
         } else {
           if (md5(user_password + "|user") === resp) {
             console.log("b");
-            store.set("current_user", { login: user_login, password: user_password });
+            store.set("current_user", { login: user_login, password: md5(user_password + "|user") });
             event.returnValue = "user";
           } else {
             console.log("c");
@@ -147,6 +141,9 @@ module.exports = () => {
           old_hash_admin === getting_pwd ? "|admin" : old_hash_user === getting_pwd ? "|user" : undefined;
         if (role) {
           pwdStatus(true);
+          console.log("1", store.get("current_user"));
+          store.set("current_user.password", md5(new_password + role));
+          console.log("2", store.get("current_user"));
           return setPassword("course_project", user_login, md5(new_password + role));
         } else {
           pwdStatus(false);
@@ -256,25 +253,70 @@ module.exports = () => {
         properties: ["openDirectory", "openFile"]
       });
       console.log("select_file", selected_file);
-      // path.dirname(selected_file[0]);
+      // let iv, key;
+      // if (!store.get("iv") && !store.get("key")) {
+      //   store.set("key", crypto.randomBytes(32));
+      //   store.set("iv", crypto.randomBytes(16));
+      // }
+      // const iv = store.get("iv");
+      // const key = store.get("key");
+
+      // const cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(key), Buffer.from(iv));
+      // fs.createReadStream(selected_file[0])
+      //   .pipe(cipher)
+      //   .pipe(
+      //     fs.createWriteStream(
+      //       path.join(store.get("directory"), `${user.login}_folder`, path.basename(selected_file[0]))
+      //     )
+      //   );
+      store.delete("key");
+      store.delete("iv");
+
       fs.createReadStream(selected_file[0]).pipe(
         fs.createWriteStream(
           path.join(store.get("directory"), `${user.login}_folder`, path.basename(selected_file[0]))
-          // path.join(
-          //   path.join(store.get("directory"), `${user.login}_folder`),
-          //   path.basename(selected_file[0])
-          // )
         )
       );
       event.returnValue = true;
     } else event.returnValue = undefined;
   });
 
-  ipcMain.on("OPEN_FILE", (event, file_name) => {
-    // const user = store.get("current_user");
-    // if (store.get("directory") && user) {
-    // }
-    // require("electron").shell.openItem(path.join(store.get("directory"), `${user.login}_folder`, file_name));
+  ipcMain.handle("OPEN_FILE", (event, file_name) => {
+    const user = store.get("current_user");
+
+    if (store.get("directory") && user) {
+      tmp.file(function _tempFileCreated(err, path1, fd, cleanupCallback) {
+        if (err) throw err;
+
+        console.log("File: ", path1);
+        console.log("Filedescriptor: ", fd);
+
+        const iv = store.get("iv");
+        const key = store.get("key");
+        console.log("key", key);
+        console.log("iv", iv);
+
+        // const decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(key), Buffer.from(iv));
+
+        // fs.createReadStream(path.join(store.get("directory"), `${user.login}_folder`, file_name))
+        //   .pipe(decipher)
+        //   .pipe(fs.createWriteStream(path1));
+
+        fs.createReadStream(path.join(store.get("directory"), `${user.login}_folder`, file_name)).pipe(
+          fs.createWriteStream(path1)
+        );
+
+        open(path1);
+        // openSelectFile(path1);
+        // open(path1, {
+        //   wait: true
+        // }).catch(function(err) {
+        //   console.log("1234  ", err);
+        // });
+
+        // cleanupCallback();
+      });
+    }
     event.returnValue = false;
   });
 
