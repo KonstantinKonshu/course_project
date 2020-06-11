@@ -108,19 +108,19 @@ const getHash = (user_login, user_password) => {
     });
 };
 
-const openSelectFile = path_file => {
-  return async dispatch => {
-    try {
-      console.log("7777");
-      const dir = await open(path_file, { wait: true });
-      console.log(dir);
-      // dispatch(setDirectory(dir ? dir : null));
-    } catch (e) {
-      console.error("678", e);
-      // dispatch(setDirectory(null));
-    }
-  };
-};
+// const openSelectFile = path_file => {
+//   return async dispatch => {
+//     try {
+//       console.log("7777");
+//       const dir = await open(path_file, { wait: true });
+//       console.log(dir);
+//       // dispatch(setDirectory(dir ? dir : null));
+//     } catch (e) {
+//       console.error("678", e);
+//       // dispatch(setDirectory(null));
+//     }
+//   };
+// };
 
 // const crypto = require("crypto");
 //
@@ -158,8 +158,8 @@ module.exports = {
   decode_base64,
   pwdStatus,
   getRole,
-  getHash,
-  openSelectFile
+  getHash
+  // openSelectFile
   // encrypt,
   // decrypt
 };

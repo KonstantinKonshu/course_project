@@ -8,7 +8,7 @@ const crypto = require("crypto");
 const tmp = require("tmp");
 const { setPassword, getPassword, findCredentials } = require("keytar");
 const { getWindow } = require("./window.js");
-const { isDirSync, pwdStatus, getRole, getHash, openSelectFile } = require("./helpers");
+const { isDirSync, pwdStatus, getHash } = require("./helpers");
 const Store = require("electron-store");
 
 const store = new Store();
@@ -46,24 +46,30 @@ module.exports = () => {
 
   ipcMain.on("GET_ROLE", (event, user_login, user_password) => {
     console.log("ipc GET_ROLE", { user_login, user_password });
-    // const result = getRole(user, pass);
-    // console.log("09876543", result);
-    // event.returnValue = result;
+
     getPassword("course_project", user_login)
       .then(resp => {
         // console.log("GET_ROLE", resp);
         if (md5(user_password + "|admin") === resp) {
           console.log("a");
-          store.set("current_user", { login: user_login, password: md5(user_password + "|admin") });
-          event.returnValue = "admin";
+          store.set("current_user", {
+            login: user_login,
+            password: md5(user_password + "|admin"),
+            role: "admin"
+          });
+          event.returnValue = true;
         } else {
           if (md5(user_password + "|user") === resp) {
             console.log("b");
-            store.set("current_user", { login: user_login, password: md5(user_password + "|user") });
-            event.returnValue = "user";
+            store.set("current_user", {
+              login: user_login,
+              password: md5(user_password + "|user"),
+              role: "user"
+            });
+            event.returnValue = false;
           } else {
             console.log("c");
-            event.returnValue = "";
+            throw new Error("o_O");
           }
         }
       })
@@ -215,16 +221,21 @@ module.exports = () => {
       });
   });
 
-  ipcMain.on("GET_USER_FILES", event => {
+  ipcMain.on("GET_USER_FILES", (event, selected_user = undefined) => {
     const user = store.get("current_user");
+    console.log("SSSSSS_User", selected_user);
+    let user_folder;
+    if (user.role === "admin") {
+      if (!selected_user) event.returnValue = [];
+      else user_folder = selected_user;
+    } else user_folder = user.login;
+
+    // const user_folder = user.role === "admin" ? selected_user ? selected_user  : user.login;
 
     console.log("USERUSER", user);
-    // fs.readdirSync(path.join("")).forEach(file => {
-    //   console.log(file);
-    // });
 
     if (store.get("directory") && user) {
-      if (!isDirSync(path.join(store.get("directory"), `${user.login}_folder`))) {
+      if (!isDirSync(path.join(store.get("directory"), `${user_folder}_folder`))) {
         console.log("NO_directory");
         //директории нет
 
@@ -232,7 +243,7 @@ module.exports = () => {
       } else {
         //директория есть
         console.log("YES_directory");
-        const files = fs.readdirSync(path.join(store.get("directory"), `${user.login}_folder`));
+        const files = fs.readdirSync(path.join(store.get("directory"), `${user_folder}_folder`));
         console.log("FILES", files);
         event.returnValue = files;
         // event.returnValue = undefined;
@@ -281,8 +292,13 @@ module.exports = () => {
     } else event.returnValue = undefined;
   });
 
-  ipcMain.handle("OPEN_FILE", (event, file_name) => {
+  ipcMain.handle("OPEN_FILE", (event, file_name, selected_user = undefined) => {
     const user = store.get("current_user");
+    let user_folder;
+    if (user.role === "admin") {
+      if (!selected_user) event.returnValue = [];
+      else user_folder = selected_user;
+    } else user_folder = user.login;
 
     if (store.get("directory") && user) {
       tmp.file(function _tempFileCreated(err, path1, fd, cleanupCallback) {
@@ -302,7 +318,7 @@ module.exports = () => {
         //   .pipe(decipher)
         //   .pipe(fs.createWriteStream(path1));
 
-        fs.createReadStream(path.join(store.get("directory"), `${user.login}_folder`, file_name)).pipe(
+        fs.createReadStream(path.join(store.get("directory"), `${user_folder}_folder`, file_name)).pipe(
           fs.createWriteStream(path1)
         );
 

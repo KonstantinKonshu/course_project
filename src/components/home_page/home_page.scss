@@ -1,7 +1,5 @@
 .cp-hp-main_container {
   display: flex;
-  //align-items: center;
-  //justify-content: center;
   flex-direction: row;
   color: white;
   height: 100%;
@@ -19,8 +17,6 @@
 
 .cp-hp-list_reg_users {
   display: flex;
-
-  //background-color: white;
 }
 
 .cp-hp-list_reg_users-item {
@@ -52,8 +48,6 @@
 .cp-hp-user_info {
   display: flex;
   flex-direction: column;
-  //align-items: center;
-  //justify-content: center;
   width: 40%;
   height: 100%;
 }
@@ -127,7 +121,19 @@
 }
 
 //================= render_Work_Panel_Admin ================================
-.cp-hp-admin_workpanel-user_list {
+
+.cp-hp-user_list-body {
+  width: calc(100% - 20px);
+  //height: 40px;
+  font-size: 14px;
+  padding: 5px;
+  margin: 10px;
+  background-color: blanchedalmond;
+  border: 1px solid #cccccc;
+}
+
+//================= render_Work_Panel_USER ================================
+.cp-hp-user_workpanel-file_list {
   width: calc(100% - 20px);
   margin: 10px;
   color: black;
@@ -140,33 +146,6 @@
   & > *:nth-child(2n + 0) {
     background-color: #ececec;
   }
-}
-.cp-hp-item_list-header {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  //justify-content: center;
-  //align-items: center;
-}
-
-.cp-hp-user_list-item {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-}
-
-.cp-hp-user_list-item_title {
-  display: flex;
-  width: 30%;
-}
-.cp-hp-user_list-item_info {
-  display: flex;
-  width: 70%;
-}
-
-//================= render_Work_Panel_USER ================================
-.cp-hp-user_workpanel-file_list {
-  @extend .cp-hp-admin_workpanel-user_list;
   & > div:not(:last-child) {
     border-bottom: 1px solid black;
   }

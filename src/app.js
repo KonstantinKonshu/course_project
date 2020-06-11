@@ -6,10 +6,6 @@ import RegModule from "./components/reg_module/reg_module";
 import "./app.scss";
 
 class App extends Component {
-  // constructor(props) {
-  //   super(props);
-  // }
-
   render() {
     return (
       <div className="cp-app-head_body">

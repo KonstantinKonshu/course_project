@@ -1,19 +1,3 @@
-// const fs = require("fs");
-// const crypto = require("crypto");
-
-// export function isDirSync(aPath) {
-//   try {
-//     return fs.statSync(aPath).isDirectory();
-//   } catch (e) {
-//     if (e.code === "ENOENT") {
-//       return false;
-//     } else {
-//       throw e;
-//     }
-//   }
-// }
-
-
 // Includes crypto module
 const crypto = require("crypto");
 

@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import ErrorMsgBD from "../error_BD_message/error_msg_BD";
 import { setUser } from "../../actions/actions";
-import { folderPath } from "../../constants";
 import "./auth_module.scss";
 
 const { ipcRenderer } = require("electron");
