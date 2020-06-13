@@ -52,3 +52,15 @@ export function openFile(file_name, selected_user = undefined) {
     }
   };
 }
+
+export function changeAvatar() {
+  return async dispatch => {
+    try {
+      console.log("6666");
+      const dir = await ipcRenderer.invoke("CHANGE_AVATAR");
+      console.log(dir);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}

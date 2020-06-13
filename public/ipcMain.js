@@ -4,11 +4,12 @@ const fs = require("fs");
 const md5 = require("md5");
 const open = require("open");
 const crypto = require("crypto");
-// const temp = require("fs-temp");
+const CryptoJS = require("crypto-js");
+const { embed, digUp } = require("@mykeels/steganography");
 const tmp = require("tmp");
 const { setPassword, getPassword, findCredentials } = require("keytar");
 const { getWindow } = require("./window.js");
-const { isDirSync, pwdStatus, getHash } = require("./helpers");
+const { isDirSync, pwdStatus, getHash, encryptionKey } = require("./helpers");
 const Store = require("electron-store");
 
 const store = new Store();
@@ -20,12 +21,16 @@ module.exports = () => {
     fs.mkdirSync(path.join(directorySpace[0], "File_store"));
     store.set("directory", path.join(directorySpace[0], "File_store"));
     console.log("DIR", store.get("directory"));
+
+    // embed(path.resolve(__dirname, "user_default_img.png"), md5(crypto.randomBytes(32)), cr_key)
+    //   .then(res => {
+    //     fs.writeFileSync(path.join(store.get("directory"), "output.png"), res);
+    //   })
+    //   .catch(function(err) {
+    //     console.log(err);
+    //   });
     return store.get("directory");
   });
-
-  // ipcMain.on("SET_DIRECTORY", (event, dir) => {
-  //   store.set("directory", dir);
-  // });
 
   ipcMain.on("CHECK_DIRECTORY", event => {
     console.log("folder_patch", store.get("directory"));
@@ -34,8 +39,6 @@ module.exports = () => {
         console.log("TR");
 
         store.delete("directory");
-        // this.setState({ is_empty_dir: true });
-        // fs.mkdirSync(folder_patch);
         event.returnValue = true;
       } else {
         console.log("FL");
@@ -49,14 +52,16 @@ module.exports = () => {
 
     getPassword("course_project", user_login)
       .then(resp => {
-        // console.log("GET_ROLE", resp);
         if (md5(user_password + "|admin") === resp) {
           console.log("a");
+
           store.set("current_user", {
             login: user_login,
             password: md5(user_password + "|admin"),
             role: "admin"
           });
+
+          console.log("STORE__", app.getPath("userData"));
           event.returnValue = true;
         } else {
           if (md5(user_password + "|user") === resp) {
@@ -109,20 +114,86 @@ module.exports = () => {
 
   ipcMain.on("GET_AVATAR_USER", (event, user_login) => {
     const avatar = store.get(`users.${user_login}.avatar`);
+
+    // if (!store.get("iv") && !store.get("key")) {
+    //   store.set("key", crypto.randomBytes(32));
+    //   store.set("iv", crypto.randomBytes(16));
+    // }
+    // const iv = store.get("iv");
+    // const key = store.get("key");
+
     if (!avatar) {
       // fs.readFileSync('./your-image.png', 'base64')
-      const file_data = fs.readFileSync(path.resolve(__dirname, "user_default_img.png"), "base64");
+      // console.log("BUFF---12");
+
+      //спрятать
+
+      // embed(path.resolve(__dirname, "user_default_img.png"), `Hello_world`, "YOUR_PASSWORD_HERE")
+      //   .then(res => {
+      //     fs.writeFileSync(path.join(__dirname, "user_default_img.png"), res);
+      //   })
+      //   .catch(function(err) {
+      //     console.log(err);
+      //   });
+
+      //раскрыть
+
+      // digUp(path.join(__dirname, "user_default_img.png"), "YOUR_PASSWORD_HERE")
+      //   .then(r => {
+      //     console.log("text", r);
+      //   })
+      //   .catch(function(err) {
+      //     console.log(err);
+      //   });
+
+      // const file_data = fs.readFileSync(path.resolve(__dirname, "user_default_img.png"), "base64");
+
+      embed(path.resolve(__dirname, "user_default_img.png"), md5(crypto.randomBytes(32)), encryptionKey)
+        .then(res => {
+          const ciphertext = CryptoJS.AES.encrypt(res, encryptionKey).toString("base64");
+          // console.log("rereres", res);
+          // console.log("cipher", ciphertext);
+          // fs.writeFileSync(
+          //   path.join(store.get("directory"), `${user_login}_folder`, `${user_login}_avatar.png`),
+          //   res
+          // );
+          //
+          // const file_data = fs.readFileSync(
+          //   path.join(store.get("directory"), `${user_login}_folder`, `${user_login}_avatar.png`),
+          //   "base64"
+          // );
+          event.returnValue = file_data;
+        })
+        .catch(function(err) {
+          console.log(err);
+        });
+
+      // try {
+      //   console.log("9999");
+      //   const buffer =  embed(
+      //       file_path,
+      //       `This is my message to the world. Love, Joy and Happiness!`,
+      //       "YOUR_PASSWORD_HERE"
+      //   );
+      //
+      //   fs.writeFileSync(path.join(__dirname, "./path/to/output.png"), buffer);
+      //   console.log(buffer);
+      // } catch (e) {
+      //   console.error(e);
+      // }}
+
       // console.log("GET_AVATAR_USER", file_data);
       // let img_path = path.resolve(__dirname, "user_default_img.png");
       // var file = element.files[0];
       // let reader = new FileReader();
       // reader.onloadend = function() {
       //   console.log("RESULT", reader.result);
-      event.returnValue = file_data;
+
       // };
       // reader.readAsDataURL("./user_default_img.png");
       // store.set(`users.${user_login}.avatar`, );
     } else {
+      event.returnValue = avatar;
       // event.ret;
     }
   });
@@ -168,7 +239,6 @@ module.exports = () => {
     console.log("ipc HASH", { user_login, user_password });
     const result = getHash(user_login, user_password);
     event.returnValue = result;
-    // event.reply("GETTING_HASH", result);
   });
 
   ipcMain.on("CHECK_USER_EXIST", (event, user_login) => {
@@ -197,6 +267,12 @@ module.exports = () => {
 
     setPassword("course_project", user_login, hash_pwd)
       .then(() => {
+        if (!store.get(`users.${user_login}.key`) && !store.get(`users.${user_login}.iv`)) {
+          store.set(`users.${user_login}.key`, crypto.randomBytes(32));
+          store.set(`users.${user_login}.iv`, crypto.randomBytes(16));
+        }
+        console.log("store.key", store.get(`users.${user_login}.key`));
+        console.log("store.iv", store.get(`users.${user_login}.iv`));
         event.returnValue = true;
       })
       .catch(function(err) {
@@ -264,30 +340,28 @@ module.exports = () => {
         properties: ["openDirectory", "openFile"]
       });
       console.log("select_file", selected_file);
-      // let iv, key;
-      // if (!store.get("iv") && !store.get("key")) {
-      //   store.set("key", crypto.randomBytes(32));
-      //   store.set("iv", crypto.randomBytes(16));
-      // }
-      // const iv = store.get("iv");
-      // const key = store.get("key");
+      const key = Buffer.from(store.get(`users.${user.login}.key`));
+      const iv = Buffer.from(store.get(`users.${user.login}.iv`));
+      // console.log("key", key);
+      // console.log("iv", iv);
+      // const key = crypto.randomBytes(32);
+      // const iv = crypto.randomBytes(16);
+      console.log("key", key);
+      console.log("iv", iv);
 
-      // const cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(key), Buffer.from(iv));
-      // fs.createReadStream(selected_file[0])
-      //   .pipe(cipher)
-      //   .pipe(
-      //     fs.createWriteStream(
-      //       path.join(store.get("directory"), `${user.login}_folder`, path.basename(selected_file[0]))
-      //     )
-      //   );
-      store.delete("key");
-      store.delete("iv");
-
-      fs.createReadStream(selected_file[0]).pipe(
-        fs.createWriteStream(
-          path.join(store.get("directory"), `${user.login}_folder`, path.basename(selected_file[0]))
-        )
-      );
+      const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
+      fs.createReadStream(selected_file[0])
+        .pipe(cipher)
+        .pipe(
+          fs.createWriteStream(
+            path.join(store.get("directory"), `${user.login}_folder`, path.basename(selected_file[0]))
+          )
+        );
+      // fs.createReadStream(selected_file[0]).pipe(
+      //   fs.createWriteStream(
+      //     path.join(store.get("directory"), `${user.login}_folder`, path.basename(selected_file[0]))
+      //   )
+      // );
       event.returnValue = true;
     } else event.returnValue = undefined;
   });
@@ -307,20 +381,20 @@ module.exports = () => {
         console.log("File: ", path1);
         console.log("Filedescriptor: ", fd);
 
-        const iv = store.get("iv");
-        const key = store.get("key");
+        const key = Buffer.from(store.get(`users.${user_folder}.key`));
+        const iv = Buffer.from(store.get(`users.${user_folder}.iv`));
         console.log("key", key);
         console.log("iv", iv);
 
-        // const decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(key), Buffer.from(iv));
+        const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
 
-        // fs.createReadStream(path.join(store.get("directory"), `${user.login}_folder`, file_name))
-        //   .pipe(decipher)
-        //   .pipe(fs.createWriteStream(path1));
+        fs.createReadStream(path.join(store.get("directory"), `${user_folder}_folder`, file_name))
+          .pipe(decipher)
+          .pipe(fs.createWriteStream(path1));
 
-        fs.createReadStream(path.join(store.get("directory"), `${user_folder}_folder`, file_name)).pipe(
-          fs.createWriteStream(path1)
-        );
+        // fs.createReadStream(path.join(store.get("directory"), `${user_folder}_folder`, file_name)).pipe(
+        //   fs.createWriteStream(path1)
+        // );
 
         open(path1);
         // openSelectFile(path1);
@@ -334,6 +408,73 @@ module.exports = () => {
       });
     }
     event.returnValue = false;
+  });
+
+  ipcMain.handle("CHANGE_AVATAR", event => {
+    console.log("CHANGE_AVATAR");
+    const select_avatar = dialog.showOpenDialogSync(getWindow("main"), {
+      properties: ["openFile"],
+      filters: [
+        {
+          name: "avatars",
+          extensions: "png|jpeg".split("|")
+        }
+      ]
+    });
+    console.log("SELECTED_IMG", select_avatar);
+
+    // store.set("current_user", {
+    //   login: user_login,
+    //   password: md5(user_password + "|admin"),
+    //   role: "admin"
+    // });
+
+    // embed(path.resolve(__dirname, "user_default_img.png"), md5(crypto.randomBytes(32)), cr_key)
+    //   .then(res => {
+    //     fs.writeFileSync(path.join(store.get("directory"), "output.png"), res);
+    //   })
+    //   .catch(function(err) {
+    //     console.log(err);
+    //   });
+
+    const user = store.get("current_user");
+    if (store.get("directory")) {
+      if (!isDirSync(path.join(store.get("directory"), `${user.login}_folder`))) {
+        console.log("NO_directory");
+        //директории нет
+        fs.mkdirSync(path.join(store.get("directory"), `${user.login}_folder`));
+      }
+
+      const selected_avatar = dialog.showOpenDialogSync(getWindow("main"), {
+        properties: ["openFile"],
+        filters: [
+          {
+            name: "avatars",
+            extensions: "png|jpeg".split("|")
+          }
+        ]
+      });
+      console.log("SELECTED_IMG", select_avatar);
+
+      const key = Buffer.from(store.get(`users.${user.login}.key`));
+      const iv = Buffer.from(store.get(`users.${user.login}.iv`));
+      // console.log("key", key);
+      // console.log("iv", iv);
+      // const key = crypto.randomBytes(32);
+      // const iv = crypto.randomBytes(16);
+      console.log("key", key);
+      console.log("iv", iv);
+
+      const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
+      fs.createReadStream(selected_avatar[0])
+        .pipe(cipher)
+        .pipe(
+          fs.createWriteStream(
+            path.join(store.get("directory"), `${user.login}_folder`, path.basename(selected_avatar[0]))
+          )
+        );
+      event.returnValue = true;
+    } else event.returnValue = undefined;
   });
 
   ipcMain.on("EXIT", event => {

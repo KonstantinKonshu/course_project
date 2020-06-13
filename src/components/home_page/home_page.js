@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { selectDirectory, addFile, setUser, openFile } from "../../actions/actions";
+import { selectDirectory, addFile, setUser, openFile, changeAvatar } from "../../actions/actions";
 import "./home_page.scss";
 const { ipcRenderer } = require("electron");
 
@@ -21,8 +21,6 @@ class HomePage extends Component {
   componentDidMount() {
     console.log("componentDidMount --- HP", this.props.user_login);
     console.log("componentDidMount --- HP_pwd", this.props.hash_password);
-    // console.log("AVATAR_USER", this.getUserAvatar(this.props.user_login));
-    // this.setState({ is_empty_dir: ipcRenderer.sendSync("CHECK_DIRECTORY") });
 
     this.setState({
       is_role: ipcRenderer.sendSync("GET_ROLE", this.props.user_login, this.props.hash_password)
@@ -66,7 +64,6 @@ class HomePage extends Component {
     setUser(null, null);
     if (ipcRenderer.sendSync("EXIT")) this.props.history.push("/");
   }
-
 
   renderWorkPanel() {
     const renderFiles = this.state.getting_files.map((file, index) => {
@@ -168,6 +165,15 @@ class HomePage extends Component {
           <div
             className="cp-hp-request_btn-btn"
             onClick={() => {
+              console.log("Hello avatar", this.props.user_login, this.props.password);
+              this.props.changeAvatar(this.props.user_login, this.props.password);
+            }}
+          >
+            Change avatar
+          </div>
+          <div
+            className="cp-hp-request_btn-btn"
+            onClick={() => {
               console.log("Hello btn");
               this.setState({ is_change_pwd: !this.state.is_change_pwd });
             }}
@@ -232,7 +238,6 @@ class HomePage extends Component {
       <div className="cp-hp-main_container">
         {this.renderUserInfo()}
         <div className="cp-hp-workpanel">
-          <div>WORK_panel</div>
           {this.state.is_change_pwd && this.renderChangePassword()}
           {this.renderWorkPanel()}
         </div>
@@ -242,7 +247,6 @@ class HomePage extends Component {
 
   render() {
     return this.renderUserSpace();
-    // return this.props.user_password ? this.renderUserSpace() : <div>hello</div>;
   }
 }
 
@@ -255,7 +259,8 @@ const mapDispatchToProps = dispatch => ({
   setUser: bindActionCreators(setUser, dispatch),
   selectDirectory: bindActionCreators(selectDirectory, dispatch),
   addFile: bindActionCreators(addFile, dispatch),
-  openFile: bindActionCreators(openFile, dispatch)
+  openFile: bindActionCreators(openFile, dispatch),
+  changeAvatar: bindActionCreators(changeAvatar, dispatch)
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomePage);
