@@ -1,4 +1,3 @@
-export const types = {
-  SET_USER: "SET_USER",
-  SET_DIRECTORY: "SET_DIRECTORY"
-};
+// Constants:
+export const SET_USER = "SET_USER";
+export const SET_DIRECTORY = "SET_DIRECTORY";

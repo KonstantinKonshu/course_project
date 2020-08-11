@@ -1,4 +1,4 @@
-import { types } from "../constants";
+import { SET_USER } from "../constants";
 
 const initialState = {
   login: null,
@@ -7,7 +7,7 @@ const initialState = {
 
 export default function(state = initialState, action) {
   switch (action.type) {
-    case types.SET_USER:
+    case SET_USER:
       return {
         ...state,
         login: action.payload1,

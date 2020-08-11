@@ -1,4 +1,4 @@
-import { types } from "../constants";
+import { SET_DIRECTORY } from "../constants";
 
 const initialState = {
   selectedDirectory: null
@@ -6,7 +6,7 @@ const initialState = {
 
 export default function(state = initialState, action) {
   switch (action.type) {
-    case types.SET_DIRECTORY:
+    case SET_DIRECTORY:
       return {
         ...state,
         selectedDirectory: action.payload
